@@ -2,8 +2,8 @@ name: Atualizar dados da FPFS
 
 on:
   schedule:
-    - cron: "0 * * * *"
-    - cron: "*/15 * * * 6"
+    - cron: "0 15 * * 1-5"
+    - cron: "*/15 * * * 0,6"
   workflow_dispatch:
 
 jobs:
