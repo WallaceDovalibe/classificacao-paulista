@@ -1,0 +1,12 @@
+{
+  "name": "classificacao-paulista-coletor",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Robo de coleta automatica dos dados da FPFS para o app de classificacao do time.",
+  "scripts": {
+    "coletar": "node coletar.js"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}
