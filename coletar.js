@@ -1,12 +1,12 @@
 // coletar.js
-// Robo de coleta automatica dos dados da FPFS (Federacao Paulista de Futsal)
-// para o app de classificacao Sub-07 a Sub-10 (Serie A3).
+// Robô de coleta automática dos dados da FPFS (Federação Paulista de Futsal)
+// para o app de classificação Sub-07 a Sub-10 (Série A3).
 //
-// O que ele faz: abre, com um navegador invisivel (Playwright), as mesmas
-// paginas que foram exploradas manualmente durante a construcao do app, extrai
-// as tabelas que ja estao prontas no HTML de cada pagina (nenhuma dessas
-// paginas carrega dados extra por clique -- todas as abas "Por Chave"/grupos ja
-// vem no HTML, so escondidas por CSS ate voce clicar; por isso nao precisamos
+// O que ele faz: abre, com um navegador invisível (Playwright), as mesmas
+// páginas que foram exploradas manualmente durante a construção do app, extrai
+// as tabelas que já estão prontas no HTML de cada página (nenhuma dessas
+// páginas carrega dados extra por clique — todas as abas "Por Chave"/grupos já
+// vêm no HTML, só escondidas por CSS até você clicar; por isso não precisamos
 // simular nenhum clique) e salva tudo em dados.json.
 //
 // Uso: node coletar.js
@@ -18,6 +18,10 @@ const fs = require("fs");
 const EVENTOS = { "Sub-07": 918, "Sub-08": 919, "Sub-09": 920, "Sub-10": 921 };
 const GRUPOS = ["Grupo 1", "Grupo 2", "Grupo 3", "Grupo 4", "Grupo 5", "Grupo 6"];
 
+// A FPFS grava o mesmo clube com grafias levemente diferentes dependendo da
+// página (espaço duplo, acento em maiúscula/minúscula, letra faltando). Isso
+// já tinha sido mapeado manualmente antes; aqui normalizamos de forma genérica
+// (espaços) e cobrimos os casos específicos conhecidos.
 const ALIASES_CLUBE = {
   "GUARULHENSE/TBC TRANPORTES": "GUARULHENSE/TBC TRANSPORTES",
 };
@@ -27,6 +31,10 @@ function normalizarClube(nome) {
 }
 
 async function extrairTabelaClassificacao(page, containerId) {
+  // Colunas da tabela (nessa ordem): Chave, Posição, Clube, Pontos, Qtde. Jogos,
+  // Vitórias, Empates, Derrotas, Gols Pro, Gols Contra, ... — por isso Vitórias
+  // só começa no índice 5 (não no 3: Pontos e Jogos vêm antes e são recalculados
+  // pelo próprio app a partir de v/e/d, não precisam ser lidos daqui).
   return page.$eval(`#${containerId}`, (div) => {
     const linhas = Array.from(div.querySelectorAll(":scope table tbody > tr")).filter(
       (tr) => tr.querySelectorAll(":scope > td").length >= 10
@@ -56,6 +64,7 @@ async function extrairJogos(page, containerId, categoria, grupo) {
         const resultText = tds[3].querySelector(".result")?.textContent.trim() || "";
         const [golsCasaTxt, golsForaTxt] = resultText.split("x").map((s) => s.trim());
         const jaAconteceu = golsCasaTxt !== "" && golsForaTxt !== "";
+        // ano fixo 2026 (temporada atual) — ajustar se a temporada virar
         const dataISO = `2026-${mes}-${dia}`;
         return {
           categoria,
@@ -101,14 +110,26 @@ async function acharAbaPorTexto(page, textoParcial) {
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
+  // As 4 chaves abaixo têm exatamente o formato que prototipo_fpfs_v9.html já
+  // espera em RANKING_A3 / TORNEIO_UNIAO / JOGOS_UNIAO_TUPLAS / ARTILHEIROS_TUPLAS
+  // — o front-end só faz uma atribuição direta, sem precisar remontar nada.
   const dados = {
     atualizadoEm: new Date().toISOString(),
-    rankingGeral: [],
-    torneioUniao: {},
-    jogosUniao: [],
-    artilheiros: [],
+    rankingGeral: [], // [ [clube,v,e,d,gp,gc,negativos], ... ]
+    torneioUniao: {}, // { "Sub-07": { "Grupo 1": [[clube,v,e,d,gp,gc],...], ... }, ... }
+    jogosUniao: [], // [ [categoria,grupo,status,data,horario,local,mandante,visitante,golsMandante,golsVisitante], ... ]
+    artilheiros: [], // [ [categoria,campeonato,jogador,clube,gols], ... ]
   };
 
+  // ---- 1) Classificação Geral (Acesso A2 = Paulista + União combinados) ----
+  // Cuidado: essa página tem a tabela de ranking (classe "table", 30 times) e,
+  // dentro de cada linha de time, uma linha extra ESCONDIDA com uma tabela
+  // aninhada de detalhes (breakdown por categoria). Um seletor genérico como
+  // "table tbody tr" cai também dentro dessa tabela aninhada e quebra a
+  // contagem de colunas — por isso aqui usamos ":scope > tbody > tr" (só
+  // linhas diretas) e filtramos só as linhas com 16 colunas (as linhas-resumo
+  // de cada time; a linha de detalhe tem só 1 coluna, com a tabela aninhada
+  // dentro dela).
   console.log("Coletando ranking geral (Acesso)...");
   await page.goto("https://eventos.admfutsal.com.br/ranking?grupo-cat=1&divisao=10", { waitUntil: "networkidle" });
   const rankingBruto = await page.$$eval("table", (tabelas) => {
@@ -129,21 +150,24 @@ async function acharAbaPorTexto(page, textoParcial) {
   });
   dados.rankingGeral = rankingBruto.map((r) => [normalizarClube(r.clube), r.v, r.e, r.d, r.gp, r.gc, r.negativos]);
 
+  // ---- 2) Classificação por grupo do Torneio União + Jogos + Artilharia, por categoria ----
   for (const [categoria, eventoId] of Object.entries(EVENTOS)) {
     console.log(`Coletando ${categoria} (evento ${eventoId})...`);
     dados.torneioUniao[categoria] = {};
 
+    // Classificação (mesma página base, todas as abas já vêm no HTML)
     await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}`, { waitUntil: "networkidle" });
     for (const grupo of GRUPOS) {
-      const containerId = await acharAbaPorTexto(page, `TORNEIO UNIAO - ${grupo.toUpperCase()}`);
-      if (!containerId) { console.warn(`  aviso: aba "${grupo}" nao encontrada em ${categoria}`); continue; }
+      const containerId = await acharAbaPorTexto(page, `TORNEIO UNIÃO - ${grupo.toUpperCase()}`);
+      if (!containerId) { console.warn(`  aviso: aba "${grupo}" não encontrada em ${categoria}`); continue; }
       const linhas = await extrairTabelaClassificacao(page, containerId);
       dados.torneioUniao[categoria][grupo] = linhas.map((l) => [normalizarClube(l.clube), l.v, l.e, l.d, l.gp, l.gc]);
     }
 
+    // Jogos (página /jogos, mesmo mecanismo de abas)
     await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}/jogos`, { waitUntil: "networkidle" });
     for (const grupo of GRUPOS) {
-      const containerId = await acharAbaPorTexto(page, `TORNEIO UNIAO - ${grupo.toUpperCase()}`);
+      const containerId = await acharAbaPorTexto(page, `TORNEIO UNIÃO - ${grupo.toUpperCase()}`);
       if (!containerId) continue;
       const jogos = await extrairJogos(page, containerId, categoria, grupo);
       jogos.forEach((j) => {
@@ -156,14 +180,15 @@ async function acharAbaPorTexto(page, textoParcial) {
       });
     }
 
+    // Artilharia: "Geral" (Paulista+União já somados pela FPFS) + cada grupo da União
     await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}/artilharia`, { waitUntil: "networkidle" });
     const geralId = await acharAbaPorTexto(page, "Geral");
-    const geralTop = (await extrairArtilharia(page, geralId)).slice(0, 30);
+    const geralTop = (await extrairArtilharia(page, geralId)).slice(0, 30); // top 30 de "buffer" (times 15 exibidos)
     geralTop.forEach((g) => (g.clube = normalizarClube(g.clube)));
 
     const uniaoPorJogador = new Map();
     for (const grupo of GRUPOS) {
-      const containerId = await acharAbaPorTexto(page, `TORNEIO UNIAO - ${grupo.toUpperCase()}`);
+      const containerId = await acharAbaPorTexto(page, `TORNEIO UNIÃO - ${grupo.toUpperCase()}`);
       if (!containerId) continue;
       const linhas = await extrairArtilharia(page, containerId);
       linhas.forEach((l) => {
