@@ -246,14 +246,14 @@ const ALIASES_ESCUDO = {
   "ATIBAIA FUTSAL /LAFS": "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
   "ESPORTES CLUBE HORTOLANDIA - E.C. HORTOLANDIA - B": "PROSPERE / HORTOLANDIA - B",
   "RSOCCER CFA ASSOCIAÇÃO ESPORTIVA E CULTURAL": "RSOCCER",
-  "FORMAÇÃO FUTSAL CAMISA DEZ LTDA - CAMISA 10 F.C. - B": "CAMISA 10 F.C. B",
+  "FORMAÇÃO FUTSAL CAMISA DEZ LTDA - CAMISA 10 F.C. - B": "CAMISA 10 F.C. B",  "GUARULHENSE/TBC TRANPORTES": "GUARULHENSE/TBC TRANSPORTES",  "GUARULHENSE/TBC TRANPORTES": "GUARULHENSE/TBC TRANSPORTES",  "GUARULHENSE/TBC TRANPORTES": "GUARULHENSE/TBC TRANSPORTES",
 };
-function buscarEscudoReal(nome) {
+function chaveComparavel(s) { return s.replace(/ \| /g, " - ").trim().toUpperCase(); } const ESCUDOS_POR_CHAVE_NORMALIZADA = {}; const ESCUDOS_POR_CURTO_NORMALIZADO = {}; Object.keys(ESCUDOS_REAIS).forEach((chave) => { ESCUDOS_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = ESCUDOS_REAIS[chave]; ESCUDOS_POR_CURTO_NORMALIZADO[chaveComparavel(nomeCurto(chave))] = ESCUDOS_REAIS[chave]; }); const ALIASES_POR_CHAVE_NORMALIZADA = {}; Object.keys(ALIASES_ESCUDO).forEach((chave) => { ALIASES_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = ALIASES_ESCUDO[chave]; }); function buscarEscudoReal(nome) {
   if (ESCUDOS_REAIS[nome]) return ESCUDOS_REAIS[nome];
   const curto = nomeCurto(nome);
   if (ESCUDOS_REAIS[curto]) return ESCUDOS_REAIS[curto];
   const alias = ALIASES_ESCUDO[nome];
-  if (alias && ESCUDOS_REAIS[alias]) return ESCUDOS_REAIS[alias];
+  if (alias && ESCUDOS_REAIS[alias]) return ESCUDOS_REAIS[alias]; const chaveNome = chaveComparavel(nome); const chaveCurto = chaveComparavel(curto); if (ESCUDOS_POR_CHAVE_NORMALIZADA[chaveNome]) return ESCUDOS_POR_CHAVE_NORMALIZADA[chaveNome]; if (ESCUDOS_POR_CURTO_NORMALIZADO[chaveCurto]) return ESCUDOS_POR_CURTO_NORMALIZADO[chaveCurto]; const aliasNormalizado = ALIASES_POR_CHAVE_NORMALIZADA[chaveNome] || ALIASES_POR_CHAVE_NORMALIZADA[chaveCurto]; if (aliasNormalizado && ESCUDOS_REAIS[aliasNormalizado]) return ESCUDOS_REAIS[aliasNormalizado];
   return null;
 }
 function Escudo({ nome, size = "w-7 h-7" }) {
