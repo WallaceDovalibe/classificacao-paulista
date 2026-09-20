@@ -1,0 +1,39 @@
+name: Atualizar dados da FPFS
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+    - cron: "*/15 * * * 6"
+  workflow_dispatch:
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Baixar o repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Instalar navegador do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Rodar o robo de coleta
+        run: node coletar.js
+
+      - name: Salvar dados.json atualizado no repositorio
+        run: |
+          git config user.name "robo-fpfs"
+          git config user.email "robo-fpfs@users.noreply.github.com"
+          git add dados.json
+          git diff --cached --quiet && echo "Sem mudancas nos dados." || git commit -m "Atualizacao automatica dos dados da FPFS"
+          git push
+
