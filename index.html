@@ -693,7 +693,7 @@ function ListaArtilheiros({ jogadores }) {
             </div>
             <Escudo nome={j.clube} size="w-9 h-9" />
             <div className="flex-1 min-w-0">
-              <p className={`text-xs font-semibold truncate ${destaque ? "text-slate-900" : "text-slate-100"}`}>{j.jogador}</p>
+              <p className={`text-xs font-semibold truncate ${destaque ? "text-slate-900" : "text-slate-100"}`}>{j.jogador && j.jogador.trim() ? j.jogador : "Atleta não identificado"}</p>
               <span className={`text-[10px] truncate ${destaque ? "text-slate-700" : "text-slate-400"}`}>{nomeCurto(j.clube)}</span>
             </div>
             <div className={`text-right shrink-0 ${destaque ? "text-slate-900" : "text-white"}`}>
