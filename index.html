@@ -1022,8 +1022,8 @@ function AbaArtilharia() {
         </div>
         <p className="text-[10px] text-slate-500 mb-3 leading-snug">
           <strong className="text-slate-400">Torneio União</strong>: soma direta dos gols de cada jogador nas abas oficiais "TORNEIO UNIÃO – GRUPO 1 a 6".{" "}
-          <strong className="text-slate-400">Campeonato Paulista</strong>: a FPFS não publica uma aba só do Paulista — cada jogador tem 1 total "Geral" (evento inteiro, somando 1ª fase + mata-mata + Torneio União). Por isso o valor do Paulista aqui é <em>calculado</em> como Geral − gols no Torneio União.{" "}
-          <strong className="text-slate-400">Total</strong>: o número "Geral" da FPFS direto da fonte, sem nenhum cálculo — Campeonato Paulista + Torneio União somados.
+          <strong className="text-slate-400">Campeonato Paulista</strong>: a FPFS não publica uma aba só do Paulista — cada jogador tem 1 total "Geral" (evento inteiro, somando 1ª fase + mata-mata + Torneio União). Por isso o valor do Paulista aqui é <em>calculado</em> como Geral − gols no Torneio União. Por causa dessa conta, a ordem aqui pode ficar diferente da aba "Geral" do site da FPFS — quem não jogou o Torneio União mantém o total cheio e pode aparecer mais acima aqui do que lá.{" "}
+          <strong className="text-slate-400">Total</strong>: o número "Geral" da FPFS direto da fonte, sem nenhum cálculo — é esta aba que bate 100% com a ordem do site oficial.
         </p>
         <ListaArtilheiros jogadores={ranking} />
       </div>
