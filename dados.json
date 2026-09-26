@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-09-26T14:43:29.969Z",
+  "atualizadoEm": "2026-09-26T14:56:28.483Z",
   "rankingGeral": [
     [
       "ASSOCIAÇÃO ESPORTIVA COMPANY SPORTS - A.E. COMPANY SPORTS",
@@ -15,8 +15,8 @@
       60,
       7,
       10,
-      326,
-      141,
+      327,
+      142,
       -2
     ],
     [
@@ -24,7 +24,7 @@
       55,
       10,
       15,
-      270,
+      271,
       143,
       -16
     ],
@@ -38,22 +38,22 @@
       -1
     ],
     [
-      "ASSOCIAÇÃO SÃO PAULO CENTER LESTE GUAIANAZES - GUAIANAZES/EVY",
-      40,
-      16,
-      19,
-      221,
-      167,
-      -5
-    ],
-    [
       "ASSOCIACAO FERROVIARIA DE ESPORTES E LAZER PEZINHO DE OURO - ITAQUERENSE FUTSAL",
-      41,
+      42,
       6,
       25,
-      223,
-      161,
+      225,
+      162,
       0
+    ],
+    [
+      "ASSOCIAÇÃO SÃO PAULO CENTER LESTE GUAIANAZES - GUAIANAZES/EVY",
+      40,
+      15,
+      20,
+      221,
+      168,
+      -5
     ],
     [
       "NACIONAL ATLÉTICO CLUBE",
@@ -96,8 +96,8 @@
       40,
       6,
       27,
-      227,
-      171,
+      229,
+      174,
       -95
     ],
     [
@@ -129,10 +129,10 @@
     ],
     [
       "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
-      29,
-      12,
+      30,
+      11,
       33,
-      152,
+      153,
       166,
       -12
     ],
@@ -186,8 +186,8 @@
       27,
       10,
       37,
-      176,
-      212,
+      179,
+      214,
       -108
     ],
     [
@@ -202,10 +202,10 @@
     [
       "VEM COMIGO GERANDO FRUTOS - CFAF",
       25,
-      11,
-      42,
+      10,
+      43,
       138,
-      207,
+      208,
       -53
     ],
     [
@@ -214,7 +214,7 @@
       4,
       45,
       169,
-      192,
+      193,
       -282
     ],
     [
@@ -227,22 +227,22 @@
       -44
     ],
     [
+      "SPORTING CLUB PAULINENSE",
+      27,
+      8,
+      45,
+      155,
+      181,
+      -311
+    ],
+    [
       "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       18,
       13,
       47,
-      123,
-      192,
+      124,
+      193,
       -65
-    ],
-    [
-      "SPORTING CLUB PAULINENSE",
-      26,
-      9,
-      45,
-      154,
-      181,
-      -311
     ],
     [
       "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
@@ -266,10 +266,10 @@
       "CLUBE DA COMUNIDADE FARIA LIMA - KILOUKURA VILA INDUSTRIAL",
       11,
       12,
-      50,
-      88,
-      240,
-      -214
+      51,
+      89,
+      242,
+      -215
     ]
   ],
   "torneioUniao": {
@@ -626,8 +626,8 @@
           2,
           1,
           0,
-          13,
-          7
+          15,
+          10
         ],
         [
           "INSTITUTO F9+",
@@ -642,8 +642,8 @@
           1,
           0,
           3,
-          6,
-          7
+          9,
+          9
         ],
         [
           "CAMISA 10 F.C. B",
@@ -835,10 +835,10 @@
         ],
         [
           "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
-          1,
           2,
           1,
-          8,
+          1,
+          9,
           8
         ],
         [
@@ -852,10 +852,10 @@
         [
           "VEM COMIGO GERANDO FRUTOS - CFAF",
           1,
-          1,
-          2,
+          0,
+          3,
           7,
-          11
+          12
         ],
         [
           "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
@@ -888,7 +888,7 @@
           1,
           0,
           3,
-          7,
+          8,
           10
         ],
         [
@@ -905,7 +905,7 @@
           0,
           3,
           8,
-          14
+          15
         ]
       ],
       "Grupo 4": [
@@ -1042,8 +1042,8 @@
           3,
           0,
           0,
-          12,
-          1
+          13,
+          2
         ],
         [
           "RESILIENCE FUTSAL",
@@ -1058,8 +1058,8 @@
           1,
           1,
           2,
-          7,
-          7
+          8,
+          8
         ],
         [
           "PEQUENINOS DE PERUS",
@@ -1207,19 +1207,19 @@
       "Grupo 5": [
         [
           "ITAQUERENSE FUTSAL",
-          2,
-          1,
+          3,
           0,
-          5,
-          0
+          0,
+          7,
+          1
         ],
         [
           "R7 FUTSAL",
           1,
-          2,
-          0,
-          6,
-          4
+          1,
+          1,
+          7,
+          6
         ],
         [
           "RSOCCER",
@@ -1440,24 +1440,24 @@
       "Grupo 2",
       "finalizado",
       "2026-09-06",
-      "11:00",
-      "GINÁSIO AYRTON SENNA DA SILVA - TABOÃO DA SERRA",
-      "VEM COMIGO GERANDO FRUTOS - CFAF",
-      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
-      10,
-      0
-    ],
-    [
-      "Sub-07",
-      "Grupo 2",
-      "finalizado",
-      "2026-09-06",
       "14:00",
       "GINASIO AFD DANA",
       "NAPOLE SPORTS",
       "A.E. COMPANY SPORTS",
       2,
       3
+    ],
+    [
+      "Sub-07",
+      "Grupo 2",
+      "finalizado",
+      "2026-09-06",
+      "11:00",
+      "GINÁSIO AYRTON SENNA DA SILVA - TABOÃO DA SERRA",
+      "VEM COMIGO GERANDO FRUTOS - CFAF",
+      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
+      10,
+      0
     ],
     [
       "Sub-07",
@@ -1512,10 +1512,10 @@
       "Grupo 2",
       "agendado",
       "2026-09-26",
-      "13:00",
-      "GINÁSIO CIE - PIETRA MEDEIROS",
-      "VEM COMIGO GERANDO FRUTOS - CFAF",
-      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
+      "14:30",
+      "GINÁSIO SINDICATO DOS SECURITÁRIOS",
+      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
+      "A.E. COMPANY SPORTS",
       null,
       null
     ],
@@ -1524,10 +1524,10 @@
       "Grupo 2",
       "agendado",
       "2026-09-26",
-      "14:30",
-      "GINÁSIO SINDICATO DOS SECURITÁRIOS",
-      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
-      "A.E. COMPANY SPORTS",
+      "13:00",
+      "GINÁSIO CIE - PIETRA MEDEIROS",
+      "VEM COMIGO GERANDO FRUTOS - CFAF",
+      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
       null,
       null
     ],
@@ -1620,24 +1620,24 @@
       "Grupo 3",
       "finalizado",
       "2026-09-26",
-      "10:00",
-      "GINÁSIO DE ESPORTES CIDADE NOVA",
-      "INSTITUTO FAMÍLIA FUTSAL | INST. FAMÍLIA/FADENP LORENA",
-      "ASSOCIACAO ATLETICA FLAMENGO",
-      0,
-      0
-    ],
-    [
-      "Sub-07",
-      "Grupo 3",
-      "finalizado",
-      "2026-09-26",
       "08:30",
       "GINASIO TOCA DO TIGRE",
       "ACISSA ASTROS FUTSAL",
       "INSTITUTO F9+",
       2,
       3
+    ],
+    [
+      "Sub-07",
+      "Grupo 3",
+      "finalizado",
+      "2026-09-26",
+      "10:00",
+      "GINÁSIO DE ESPORTES CIDADE NOVA",
+      "INSTITUTO FAMÍLIA FUTSAL | INST. FAMÍLIA/FADENP LORENA",
+      "ASSOCIACAO ATLETICA FLAMENGO",
+      0,
+      0
     ],
     [
       "Sub-07",
@@ -1824,24 +1824,24 @@
       "Grupo 5",
       "finalizado",
       "2026-09-19",
-      "13:00",
-      "CLUBE DE CAMPO DE TATUI - MANOEL SOARES",
-      "C.C. DE TATUí",
-      "R7 FUTSAL",
-      0,
-      0
-    ],
-    [
-      "Sub-07",
-      "Grupo 5",
-      "finalizado",
-      "2026-09-19",
       "15:00",
       "IPASURE - CDC - ROSA NEGRA",
       "ROSA NEGRA/IPASURE FUTSAL",
       "RSOCCER",
       3,
       4
+    ],
+    [
+      "Sub-07",
+      "Grupo 5",
+      "finalizado",
+      "2026-09-19",
+      "13:00",
+      "CLUBE DE CAMPO DE TATUI - MANOEL SOARES",
+      "C.C. DE TATUí",
+      "R7 FUTSAL",
+      0,
+      0
     ],
     [
       "Sub-07",
@@ -2136,24 +2136,24 @@
       "Grupo 2",
       "finalizado",
       "2026-08-30",
-      "09:30",
-      "GINÁSIO CEMPRE - BASE",
-      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
-      "NAPOLE SPORTS",
-      1,
-      6
-    ],
-    [
-      "Sub-08",
-      "Grupo 2",
-      "finalizado",
-      "2026-08-30",
       "15:00",
       "GINASIO DA COMUNIDADE ARMENIA DE OSASCO",
       "A.E. COMPANY SPORTS",
       "VEM COMIGO GERANDO FRUTOS - CFAF",
       8,
       0
+    ],
+    [
+      "Sub-08",
+      "Grupo 2",
+      "finalizado",
+      "2026-08-30",
+      "09:30",
+      "GINÁSIO CEMPRE - BASE",
+      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
+      "NAPOLE SPORTS",
+      1,
+      6
     ],
     [
       "Sub-08",
@@ -2232,10 +2232,10 @@
       "Grupo 2",
       "agendado",
       "2026-09-26",
-      "12:00",
-      "GINÁSIO CIE - PIETRA MEDEIROS",
-      "VEM COMIGO GERANDO FRUTOS - CFAF",
-      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
+      "15:30",
+      "GINÁSIO SINDICATO DOS SECURITÁRIOS",
+      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
+      "A.E. COMPANY SPORTS",
       null,
       null
     ],
@@ -2244,10 +2244,10 @@
       "Grupo 2",
       "agendado",
       "2026-09-26",
-      "15:30",
-      "GINÁSIO SINDICATO DOS SECURITÁRIOS",
-      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
-      "A.E. COMPANY SPORTS",
+      "12:00",
+      "GINÁSIO CIE - PIETRA MEDEIROS",
+      "VEM COMIGO GERANDO FRUTOS - CFAF",
+      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
       null,
       null
     ],
@@ -2344,8 +2344,8 @@
       "GINÁSIO DE ESPORTES CIDADE NOVA",
       "INSTITUTO FAMÍLIA FUTSAL | INST. FAMÍLIA/FADENP LORENA",
       "ASSOCIACAO ATLETICA FLAMENGO",
-      2,
-      4
+      4,
+      7
     ],
     [
       "Sub-08",
@@ -2544,24 +2544,24 @@
       "Grupo 5",
       "finalizado",
       "2026-09-19",
-      "14:00",
-      "CLUBE DE CAMPO DE TATUI - MANOEL SOARES",
-      "C.C. DE TATUí",
-      "R7 FUTSAL",
-      3,
-      0
-    ],
-    [
-      "Sub-08",
-      "Grupo 5",
-      "finalizado",
-      "2026-09-19",
       "16:00",
       "IPASURE - CDC - ROSA NEGRA",
       "ROSA NEGRA/IPASURE FUTSAL",
       "RSOCCER",
       3,
       2
+    ],
+    [
+      "Sub-08",
+      "Grupo 5",
+      "finalizado",
+      "2026-09-19",
+      "14:00",
+      "CLUBE DE CAMPO DE TATUI - MANOEL SOARES",
+      "C.C. DE TATUí",
+      "R7 FUTSAL",
+      3,
+      0
     ],
     [
       "Sub-08",
@@ -2712,10 +2712,10 @@
       "Grupo 6",
       "agendado",
       "2026-09-27",
-      "15:00",
-      "GINÁSIO POLIESPORTIVO JOÃO CARLOS DE CAMARGO",
-      "LIGA SOROCABANA DE FUTEBOL DE SALÃO",
-      "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
+      "09:30",
+      "GINÁSIO DO JABAQUARA",
+      "A.C.T. BOLA NO PÉ SÃO VICENTE",
+      "NACIONAL ATLÉTICO CLUBE",
       null,
       null
     ],
@@ -2724,10 +2724,10 @@
       "Grupo 6",
       "agendado",
       "2026-09-27",
-      "09:30",
-      "GINÁSIO DO JABAQUARA",
-      "A.C.T. BOLA NO PÉ SÃO VICENTE",
-      "NACIONAL ATLÉTICO CLUBE",
+      "15:00",
+      "GINÁSIO POLIESPORTIVO JOÃO CARLOS DE CAMARGO",
+      "LIGA SOROCABANA DE FUTEBOL DE SALÃO",
+      "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
       null,
       null
     ],
@@ -2809,11 +2809,11 @@
       "finalizado",
       "2026-09-19",
       "10:30",
-      "GINASIO TOCA DO TIGRE",
-      "PEQUENINOS DE PERUS",
-      "ASSOCIAÇÃO ESPORTIVA RAPOSAS DA LESTE | A.E. RAPOSA DA LESTE",
-      3,
-      2
+      "GINASIO CE JOERG BRUDER",
+      "RESILIENCE FUTSAL",
+      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
+      6,
+      1
     ],
     [
       "Sub-09",
@@ -2821,11 +2821,11 @@
       "finalizado",
       "2026-09-19",
       "10:30",
-      "GINASIO CE JOERG BRUDER",
-      "RESILIENCE FUTSAL",
-      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
-      6,
-      1
+      "GINASIO TOCA DO TIGRE",
+      "PEQUENINOS DE PERUS",
+      "ASSOCIAÇÃO ESPORTIVA RAPOSAS DA LESTE | A.E. RAPOSA DA LESTE",
+      3,
+      2
     ],
     [
       "Sub-09",
@@ -2856,24 +2856,24 @@
       "Grupo 2",
       "finalizado",
       "2026-08-30",
-      "16:00",
-      "GINASIO DA COMUNIDADE ARMENIA DE OSASCO",
-      "A.E. COMPANY SPORTS",
-      "VEM COMIGO GERANDO FRUTOS - CFAF",
-      8,
-      1
-    ],
-    [
-      "Sub-09",
-      "Grupo 2",
-      "finalizado",
-      "2026-08-30",
       "10:30",
       "GINÁSIO CEMPRE - BASE",
       "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
       "NAPOLE SPORTS",
       2,
       2
+    ],
+    [
+      "Sub-09",
+      "Grupo 2",
+      "finalizado",
+      "2026-08-30",
+      "16:00",
+      "GINASIO DA COMUNIDADE ARMENIA DE OSASCO",
+      "A.E. COMPANY SPORTS",
+      "VEM COMIGO GERANDO FRUTOS - CFAF",
+      8,
+      1
     ],
     [
       "Sub-09",
@@ -2957,7 +2957,7 @@
       "VEM COMIGO GERANDO FRUTOS - CFAF",
       "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
       1,
-      1
+      2
     ],
     [
       "Sub-09",
@@ -3018,6 +3018,18 @@
       "ASSOCIACAO ATLETICA FLAMENGO",
       4,
       5
+    ],
+    [
+      "Sub-09",
+      "Grupo 3",
+      "finalizado",
+      "2026-09-19",
+      "10:30",
+      "GINÁSIO CÉU CUMBICA",
+      "ASSOCIACAO ATLETICA FLAMENGO",
+      "CAMISA 10 F.C. B",
+      0,
+      1
     ],
     [
       "Sub-09",
@@ -3035,18 +3047,6 @@
       "Sub-09",
       "Grupo 3",
       "finalizado",
-      "2026-09-19",
-      "10:30",
-      "GINÁSIO CÉU CUMBICA",
-      "ASSOCIACAO ATLETICA FLAMENGO",
-      "CAMISA 10 F.C. B",
-      0,
-      1
-    ],
-    [
-      "Sub-09",
-      "Grupo 3",
-      "finalizado",
       "2026-09-20",
       "11:00",
       "GINÁSIO DE ESPORTES CIDADE NOVA",
@@ -3077,7 +3077,7 @@
       "ACISSA ASTROS FUTSAL",
       "INSTITUTO F9+",
       1,
-      3
+      4
     ],
     [
       "Sub-09",
@@ -3312,10 +3312,10 @@
       "Grupo 5",
       "agendado",
       "2026-10-03",
-      "16:30",
-      "GINÁSIO ELITE ITAQUERENSE",
-      "ITAQUERENSE FUTSAL",
-      "C.C. DE TATUí",
+      "12:00",
+      "GINÁSIO CÉU CUMBICA",
+      "R7 FUTSAL",
+      "ROSA NEGRA/IPASURE FUTSAL",
       null,
       null
     ],
@@ -3324,10 +3324,10 @@
       "Grupo 5",
       "agendado",
       "2026-10-03",
-      "12:00",
-      "GINÁSIO CÉU CUMBICA",
-      "R7 FUTSAL",
-      "ROSA NEGRA/IPASURE FUTSAL",
+      "16:30",
+      "GINÁSIO ELITE ITAQUERENSE",
+      "ITAQUERENSE FUTSAL",
+      "C.C. DE TATUí",
       null,
       null
     ],
@@ -3432,10 +3432,10 @@
       "Grupo 6",
       "agendado",
       "2026-09-27",
-      "10:30",
-      "GINÁSIO DO JABAQUARA",
-      "A.C.T. BOLA NO PÉ SÃO VICENTE",
-      "NACIONAL ATLÉTICO CLUBE",
+      "16:00",
+      "GINÁSIO POLIESPORTIVO JOÃO CARLOS DE CAMARGO",
+      "LIGA SOROCABANA DE FUTEBOL DE SALÃO",
+      "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
       null,
       null
     ],
@@ -3444,10 +3444,10 @@
       "Grupo 6",
       "agendado",
       "2026-09-27",
-      "16:00",
-      "GINÁSIO POLIESPORTIVO JOÃO CARLOS DE CAMARGO",
-      "LIGA SOROCABANA DE FUTEBOL DE SALÃO",
-      "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
+      "10:30",
+      "GINÁSIO DO JABAQUARA",
+      "A.C.T. BOLA NO PÉ SÃO VICENTE",
+      "NACIONAL ATLÉTICO CLUBE",
       null,
       null
     ],
@@ -3556,8 +3556,8 @@
       "ARENA GUARULHENSE",
       "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
-      0,
-      1
+      1,
+      2
     ],
     [
       "Sub-10",
@@ -4006,14 +4006,14 @@
     [
       "Sub-10",
       "Grupo 5",
-      "agendado",
+      "finalizado",
       "2026-09-26",
       "11:30",
       "GINÁSIO CÉU CUMBICA",
       "R7 FUTSAL",
       "ITAQUERENSE FUTSAL",
-      null,
-      null
+      1,
+      2
     ],
     [
       "Sub-10",
@@ -4197,15 +4197,15 @@
     [
       "Sub-07",
       "uniao",
-      "VITOR SOUZA DE ARAUJO",
-      "ACISSA ASTROS FUTSAL",
+      "DAVI LUCCA BESSA DA SILVA",
+      "INSTITUTO F9+",
       6
     ],
     [
       "Sub-07",
       "uniao",
-      "DAVI LUCCA BESSA DA SILVA",
-      "INSTITUTO F9+",
+      "VITOR SOUZA DE ARAUJO",
+      "ACISSA ASTROS FUTSAL",
       6
     ],
     [
@@ -4428,15 +4428,15 @@
     [
       "Sub-07",
       "total",
-      "HENRY HERNANDES DE CARVALHO",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "ILLKER NUNES DA SILVA",
+      "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
       24
     ],
     [
       "Sub-07",
       "total",
-      "ILLKER NUNES DA SILVA",
-      "LIGA ATIBAIAENSE DE FUITSAL - LAFS",
+      "HENRY HERNANDES DE CARVALHO",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       24
     ],
     [
@@ -4449,15 +4449,15 @@
     [
       "Sub-07",
       "total",
-      "JUAN JESUS RIBEIRA MOURA",
-      "INSTITUTO F9+",
+      "MATHEUS MIRANDOLA NARCISO",
+      "NACIONAL ATLÉTICO CLUBE",
       22
     ],
     [
       "Sub-07",
       "total",
-      "MATHEUS MIRANDOLA NARCISO",
-      "NACIONAL ATLÉTICO CLUBE",
+      "JUAN JESUS RIBEIRA MOURA",
+      "INSTITUTO F9+",
       22
     ],
     [
@@ -4533,6 +4533,13 @@
     [
       "Sub-08",
       "uniao",
+      "FERNANDO LIMA DA SILVA",
+      "ASSOCIACAO ATLETICA FLAMENGO",
+      4
+    ],
+    [
+      "Sub-08",
+      "uniao",
       "GABRIEL DA FONSECASANTOS",
       "ROSA NEGRA/IPASURE FUTSAL",
       4
@@ -4556,13 +4563,6 @@
       "uniao",
       "GABRIEL FERREIRA SOARES",
       "PEQUENINOS DE PERUS",
-      3
-    ],
-    [
-      "Sub-08",
-      "uniao",
-      "MATHEUS ARAUJO NAKA",
-      "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
       3
     ],
     [
@@ -4757,15 +4757,15 @@
     [
       "Sub-08",
       "total",
-      "ARTHUR APARECIDO PERERIA GUIMARAES",
-      "ASSOCIACAO ATLETICA FLAMENGO",
+      "GUILHERME JOSE ARAUJO NASCIMENTO",
+      "PEQUENINOS DE PERUS",
       18
     ],
     [
       "Sub-08",
       "total",
-      "GUILHERME JOSE ARAUJO NASCIMENTO",
-      "PEQUENINOS DE PERUS",
+      "ARTHUR APARECIDO PERERIA GUIMARAES",
+      "ASSOCIACAO ATLETICA FLAMENGO",
       18
     ],
     [
@@ -4785,8 +4785,8 @@
     [
       "Sub-08",
       "total",
-      "BENJAMIN SILVA ESTEVES",
-      "NAPOLE SPORTS",
+      "BENTO BORGES MIRANDA",
+      "ACISSA ASTROS FUTSAL",
       15
     ],
     [
@@ -4799,8 +4799,8 @@
     [
       "Sub-08",
       "total",
-      "MIGUEL JOSE AGUIAR",
-      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
+      "CHISON RICHARD VICENTE ANI",
+      "GUAIANAZES/EVY",
       15
     ],
     [
@@ -4862,13 +4862,6 @@
     [
       "Sub-09",
       "uniao",
-      "DAVI AZEVEDO DOS SANTOS",
-      "CAMISA 10 F.C. B",
-      3
-    ],
-    [
-      "Sub-09",
-      "uniao",
       "MIGUEL HENRIQUE DE OLIVEIRA",
       "ACISSA ASTROS FUTSAL",
       3
@@ -4876,14 +4869,21 @@
     [
       "Sub-09",
       "uniao",
-      "ENZO GABRIEL INACIO SANTOS",
-      "GUAIANAZES/EVY",
+      "DAVI AZEVEDO DOS SANTOS",
+      "CAMISA 10 F.C. B",
       3
     ],
     [
       "Sub-09",
       "uniao",
       "JOAO VITOR SOUSA MONTE",
+      "GUAIANAZES/EVY",
+      3
+    ],
+    [
+      "Sub-09",
+      "uniao",
+      "ENZO GABRIEL INACIO SANTOS",
       "GUAIANAZES/EVY",
       3
     ],
@@ -4897,15 +4897,15 @@
     [
       "Sub-09",
       "uniao",
-      "ENZO ROCHA BRITO",
-      "RESILIENCE FUTSAL",
+      "GREGORY FELIPE ROCHA SENA",
+      "ASSOCIAÇÃO ESPORTIVA RAPOSAS DA LESTE | A.E. RAPOSA DA LESTE",
       2
     ],
     [
       "Sub-09",
       "uniao",
-      "MIGUEL AUGUSTO MATTOS DE OLIVEIRA",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "HENRIQUE JUN TEZONI NOMURA",
+      "RESILIENCE FUTSAL",
       2
     ],
     [
@@ -5051,20 +5051,6 @@
     [
       "Sub-09",
       "total",
-      "PIETRO SANTOS DE OLIVEIRA",
-      "LIGA AMADORA DE ITAPEVI DE FUTSAL",
-      17
-    ],
-    [
-      "Sub-09",
-      "total",
-      "MARCOS DAVI DE OLIVEIRA REIS",
-      "ROSA NEGRA/IPASURE FUTSAL",
-      17
-    ],
-    [
-      "Sub-09",
-      "total",
       "ARTHUR ACACIO DOS SANTOS",
       "ASSOCIACAO ATLETICA FLAMENGO",
       17
@@ -5072,8 +5058,22 @@
     [
       "Sub-09",
       "total",
+      "PIETRO SANTOS DE OLIVEIRA",
+      "LIGA AMADORA DE ITAPEVI DE FUTSAL",
+      17
+    ],
+    [
+      "Sub-09",
+      "total",
       "THALLES RODRIGUES MOURA",
       "INSTITUTO F9+",
+      17
+    ],
+    [
+      "Sub-09",
+      "total",
+      "MARCOS DAVI DE OLIVEIRA REIS",
+      "ROSA NEGRA/IPASURE FUTSAL",
       17
     ],
     [
@@ -5100,13 +5100,6 @@
     [
       "Sub-09",
       "total",
-      "MIGUEL PUPO GUIMARãES",
-      "JABAQUARA ATLÉTICO CLUBE",
-      14
-    ],
-    [
-      "Sub-09",
-      "total",
       "MIGUEL JULIO DE SOUZA",
       "PEQUENINOS DE PERUS",
       14
@@ -5116,6 +5109,13 @@
       "total",
       "HEITOR SILVA VIANA",
       "VEM COMIGO GERANDO FRUTOS - CFAF",
+      14
+    ],
+    [
+      "Sub-09",
+      "total",
+      "MIGUEL PUPO GUIMARãES",
+      "JABAQUARA ATLÉTICO CLUBE",
       14
     ],
     [
@@ -5135,6 +5135,13 @@
     [
       "Sub-10",
       "uniao",
+      "JOAQUIM SILVA BARBOSA",
+      "RESILIENCE FUTSAL",
+      3
+    ],
+    [
+      "Sub-10",
+      "uniao",
       "DAVI LONGOBARDI MAZINI",
       "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       3
@@ -5150,13 +5157,6 @@
       "Sub-10",
       "uniao",
       "GABRIEL LEãO SOTERO FABRICIO",
-      "RESILIENCE FUTSAL",
-      3
-    ],
-    [
-      "Sub-10",
-      "uniao",
-      "JOAQUIM SILVA BARBOSA",
       "RESILIENCE FUTSAL",
       3
     ],
@@ -5198,20 +5198,6 @@
     [
       "Sub-10",
       "uniao",
-      "KAIQUE NUNES GARCIA",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
-      2
-    ],
-    [
-      "Sub-10",
-      "uniao",
-      "MIGUEL MENDES LUZ",
-      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
-      2
-    ],
-    [
-      "Sub-10",
-      "uniao",
       "SAMUEL DOS SANTOS DIAS",
       "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       2
@@ -5220,6 +5206,20 @@
       "Sub-10",
       "uniao",
       "PEDRO CAETANO DE SÁ",
+      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
+      2
+    ],
+    [
+      "Sub-10",
+      "uniao",
+      "DIEGO DA COSTA SILVA",
+      "RESILIENCE FUTSAL",
+      2
+    ],
+    [
+      "Sub-10",
+      "uniao",
+      "MIGUEL MENDES LUZ",
       "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       2
     ],
@@ -5282,6 +5282,13 @@
     [
       "Sub-10",
       "paulista",
+      "JOÃO MIGUEL FERREIRA SIMÕES",
+      "JABAQUARA ATLÉTICO CLUBE",
+      12
+    ],
+    [
+      "Sub-10",
+      "paulista",
       "KAIQUE NUNES GARCIA",
       "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       12
@@ -5289,8 +5296,8 @@
     [
       "Sub-10",
       "paulista",
-      "JOÃO MIGUEL FERREIRA SIMÕES",
-      "JABAQUARA ATLÉTICO CLUBE",
+      "FELIPE JESUS FERREIRA LIMA",
+      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       12
     ],
     [
@@ -5305,13 +5312,6 @@
       "paulista",
       "DAVI NUNES DOMINGUES",
       "A.E. COMPANY SPORTS",
-      12
-    ],
-    [
-      "Sub-10",
-      "paulista",
-      "FELIPE JESUS FERREIRA LIMA",
-      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       12
     ],
     [
@@ -5366,15 +5366,8 @@
     [
       "Sub-10",
       "total",
-      "PEDRO HENRIQUE DO NASCIMENTO",
-      "GUAIANAZES/EVY",
-      14
-    ],
-    [
-      "Sub-10",
-      "total",
-      "RYCHARD ARTHUR SANTOS LOPES",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "JOÃO MIGUEL FERREIRA SIMÕES",
+      "JABAQUARA ATLÉTICO CLUBE",
       14
     ],
     [
@@ -5387,13 +5380,6 @@
     [
       "Sub-10",
       "total",
-      "JOÃO MIGUEL FERREIRA SIMÕES",
-      "JABAQUARA ATLÉTICO CLUBE",
-      14
-    ],
-    [
-      "Sub-10",
-      "total",
       "DAVI LUIS BATISTA SILVA",
       "RESILIENCE FUTSAL",
       14
@@ -5401,8 +5387,22 @@
     [
       "Sub-10",
       "total",
-      "HENRIQUE SIMÕES AMORIM",
-      "RESILIENCE FUTSAL",
+      "RYCHARD ARTHUR SANTOS LOPES",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      14
+    ],
+    [
+      "Sub-10",
+      "total",
+      "PEDRO HENRIQUE DO NASCIMENTO",
+      "GUAIANAZES/EVY",
+      14
+    ],
+    [
+      "Sub-10",
+      "total",
+      "FELIPE JESUS FERREIRA LIMA",
+      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       13
     ],
     [
@@ -5415,6 +5415,13 @@
     [
       "Sub-10",
       "total",
+      "HENRIQUE SIMÕES AMORIM",
+      "RESILIENCE FUTSAL",
+      13
+    ],
+    [
+      "Sub-10",
+      "total",
       "BENICIO FURLAN",
       "PROSPERE / HORTOLANDIA - B",
       13
@@ -5422,15 +5429,8 @@
     [
       "Sub-10",
       "total",
-      "PEDRO MONTEIRO DE OLIVEIRA",
-      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
-      12
-    ],
-    [
-      "Sub-10",
-      "total",
-      "GABRIEL LEãO SOTERO FABRICIO",
-      "RESILIENCE FUTSAL",
+      "DAVI NUNES DOMINGUES",
+      "A.E. COMPANY SPORTS",
       12
     ]
   ]
