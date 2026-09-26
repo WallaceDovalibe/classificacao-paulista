@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-09-26T21:42:02.334Z",
+  "atualizadoEm": "2026-09-26T21:55:04.090Z",
   "rankingGeral": [
     [
       "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
@@ -15,7 +15,7 @@
       62,
       5,
       14,
-      361,
+      364,
       114,
       -2
     ],
@@ -232,7 +232,7 @@
       10,
       46,
       130,
-      339,
+      342,
       -82
     ],
     [
@@ -1084,7 +1084,7 @@
           3,
           0,
           1,
-          12,
+          15,
           5
         ],
         [
@@ -1101,7 +1101,7 @@
           1,
           1,
           6,
-          8
+          11
         ],
         [
           "VEM COMIGO GERANDO FRUTOS - CFAF",
@@ -2062,18 +2062,6 @@
     [
       "Sub-08",
       "Grupo 1",
-      "agendado",
-      "2026-09-12",
-      "15:30",
-      "GINASIO CDC CURTIBALL",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
-      "RESILIENCE FUTSAL",
-      null,
-      null
-    ],
-    [
-      "Sub-08",
-      "Grupo 1",
       "finalizado",
       "2026-09-12",
       "09:30",
@@ -2082,6 +2070,18 @@
       "PEQUENINOS DE PERUS",
       0,
       3
+    ],
+    [
+      "Sub-08",
+      "Grupo 1",
+      "agendado",
+      "2026-09-12",
+      "15:30",
+      "GINASIO CDC CURTIBALL",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "RESILIENCE FUTSAL",
+      null,
+      null
     ],
     [
       "Sub-08",
@@ -2160,24 +2160,24 @@
       "Grupo 2",
       "finalizado",
       "2026-09-06",
-      "15:00",
-      "GINASIO AFD DANA",
-      "NAPOLE SPORTS",
-      "A.E. COMPANY SPORTS",
-      1,
-      5
-    ],
-    [
-      "Sub-08",
-      "Grupo 2",
-      "finalizado",
-      "2026-09-06",
       "12:00",
       "GINÁSIO AYRTON SENNA DA SILVA - TABOÃO DA SERRA",
       "VEM COMIGO GERANDO FRUTOS - CFAF",
       "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
       3,
       3
+    ],
+    [
+      "Sub-08",
+      "Grupo 2",
+      "finalizado",
+      "2026-09-06",
+      "15:00",
+      "GINASIO AFD DANA",
+      "NAPOLE SPORTS",
+      "A.E. COMPANY SPORTS",
+      1,
+      5
     ],
     [
       "Sub-08",
@@ -2736,24 +2736,24 @@
       "Grupo 1",
       "finalizado",
       "2026-08-29",
-      "16:30",
-      "GINASIO CDC CURTIBALL",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
-      "ASSOCIAÇÃO ESPORTIVA RAPOSAS DA LESTE | A.E. RAPOSA DA LESTE",
-      5,
-      1
-    ],
-    [
-      "Sub-09",
-      "Grupo 1",
-      "finalizado",
-      "2026-08-29",
       "16:00",
       "GINASIO CE JOERG BRUDER",
       "RESILIENCE FUTSAL",
       "PEQUENINOS DE PERUS",
       5,
       2
+    ],
+    [
+      "Sub-09",
+      "Grupo 1",
+      "finalizado",
+      "2026-08-29",
+      "16:30",
+      "GINASIO CDC CURTIBALL",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "ASSOCIAÇÃO ESPORTIVA RAPOSAS DA LESTE | A.E. RAPOSA DA LESTE",
+      5,
+      1
     ],
     [
       "Sub-09",
@@ -2856,18 +2856,6 @@
       "Grupo 2",
       "finalizado",
       "2026-08-30",
-      "16:00",
-      "GINASIO DA COMUNIDADE ARMENIA DE OSASCO",
-      "A.E. COMPANY SPORTS",
-      "VEM COMIGO GERANDO FRUTOS - CFAF",
-      8,
-      1
-    ],
-    [
-      "Sub-09",
-      "Grupo 2",
-      "finalizado",
-      "2026-08-30",
       "10:30",
       "GINÁSIO CEMPRE - BASE",
       "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
@@ -2879,12 +2867,12 @@
       "Sub-09",
       "Grupo 2",
       "finalizado",
-      "2026-09-06",
+      "2026-08-30",
       "16:00",
-      "GINASIO AFD DANA",
-      "NAPOLE SPORTS",
+      "GINASIO DA COMUNIDADE ARMENIA DE OSASCO",
       "A.E. COMPANY SPORTS",
-      0,
+      "VEM COMIGO GERANDO FRUTOS - CFAF",
+      8,
       1
     ],
     [
@@ -2898,6 +2886,18 @@
       "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
       5,
       0
+    ],
+    [
+      "Sub-09",
+      "Grupo 2",
+      "finalizado",
+      "2026-09-06",
+      "16:00",
+      "GINASIO AFD DANA",
+      "NAPOLE SPORTS",
+      "A.E. COMPANY SPORTS",
+      0,
+      1
     ],
     [
       "Sub-09",
@@ -3689,7 +3689,7 @@
       "ASSOCIAÇÃO ESPORTIVA CULTURAL VMANEGER ITAQUERA C13",
       "A.E. COMPANY SPORTS",
       2,
-      4
+      7
     ],
     [
       "Sub-10",
@@ -3780,24 +3780,24 @@
       "Grupo 3",
       "finalizado",
       "2026-09-26",
-      "11:30",
-      "GINASIO TOCA DO TIGRE",
-      "ACISSA ASTROS FUTSAL",
-      "INSTITUTO F9+",
-      1,
-      3
-    ],
-    [
-      "Sub-10",
-      "Grupo 3",
-      "finalizado",
-      "2026-09-26",
       "13:00",
       "GINÁSIO DE ESPORTES CIDADE NOVA",
       "INSTITUTO FAMÍLIA FUTSAL | INST. FAMÍLIA/FADENP LORENA",
       "ASSOCIACAO ATLETICA FLAMENGO",
       2,
       1
+    ],
+    [
+      "Sub-10",
+      "Grupo 3",
+      "finalizado",
+      "2026-09-26",
+      "11:30",
+      "GINASIO TOCA DO TIGRE",
+      "ACISSA ASTROS FUTSAL",
+      "INSTITUTO F9+",
+      1,
+      3
     ],
     [
       "Sub-10",
@@ -3912,24 +3912,24 @@
       "Grupo 4",
       "finalizado",
       "2026-09-26",
-      "12:00",
-      "GINÁSIO DE ESPORTES VICENTE AMATTE",
-      "SPORTING CLUB PAULINENSE",
-      "GUAIANAZES/EVY",
-      3,
-      3
-    ],
-    [
-      "Sub-10",
-      "Grupo 4",
-      "finalizado",
-      "2026-09-26",
       "17:30",
       "GINÁSIO CIEF - ITAPEVI",
       "LIGA AMADORA DE ITAPEVI DE FUTSAL",
       "JABAQUARA ATLÉTICO CLUBE",
       1,
       0
+    ],
+    [
+      "Sub-10",
+      "Grupo 4",
+      "finalizado",
+      "2026-09-26",
+      "12:00",
+      "GINÁSIO DE ESPORTES VICENTE AMATTE",
+      "SPORTING CLUB PAULINENSE",
+      "GUAIANAZES/EVY",
+      3,
+      3
     ],
     [
       "Sub-10",
@@ -4204,15 +4204,15 @@
     [
       "Sub-07",
       "uniao",
-      "DAVI LUCCA BESSA DA SILVA",
-      "INSTITUTO F9+",
+      "VITOR SOUZA DE ARAUJO",
+      "ACISSA ASTROS FUTSAL",
       6
     ],
     [
       "Sub-07",
       "uniao",
-      "VITOR SOUZA DE ARAUJO",
-      "ACISSA ASTROS FUTSAL",
+      "DAVI LUCCA BESSA DA SILVA",
+      "INSTITUTO F9+",
       6
     ],
     [
@@ -4393,13 +4393,6 @@
     [
       "Sub-07",
       "total",
-      "BENJAMIN ALVES SANTOS",
-      "JABAQUARA ATLÉTICO CLUBE",
-      27
-    ],
-    [
-      "Sub-07",
-      "total",
       "AFONSO LAROTONDA",
       "C.C. DE TATUí",
       27
@@ -4407,15 +4400,22 @@
     [
       "Sub-07",
       "total",
-      "CALEB GOMES DOS SANTOS",
-      "GUAIANAZES/EVY",
-      26
+      "BENJAMIN ALVES SANTOS",
+      "JABAQUARA ATLÉTICO CLUBE",
+      27
     ],
     [
       "Sub-07",
       "total",
       "NATHAN MAX DA SILVA RODRIGUES",
       "RSOCCER",
+      26
+    ],
+    [
+      "Sub-07",
+      "total",
+      "CALEB GOMES DOS SANTOS",
+      "GUAIANAZES/EVY",
       26
     ],
     [
@@ -4449,15 +4449,15 @@
     [
       "Sub-07",
       "total",
-      "JUAN JESUS RIBEIRA MOURA",
-      "INSTITUTO F9+",
+      "MATHEUS MIRANDOLA NARCISO",
+      "NACIONAL ATLÉTICO CLUBE",
       22
     ],
     [
       "Sub-07",
       "total",
-      "MATHEUS MIRANDOLA NARCISO",
-      "NACIONAL ATLÉTICO CLUBE",
+      "JUAN JESUS RIBEIRA MOURA",
+      "INSTITUTO F9+",
       22
     ],
     [
@@ -4897,15 +4897,15 @@
     [
       "Sub-09",
       "uniao",
-      "MIGUEL HENRIQUE DE OLIVEIRA",
-      "ACISSA ASTROS FUTSAL",
+      "DAVI AZEVEDO DOS SANTOS",
+      "CAMISA 10 F.C. B",
       3
     ],
     [
       "Sub-09",
       "uniao",
-      "DAVI AZEVEDO DOS SANTOS",
-      "CAMISA 10 F.C. B",
+      "MIGUEL HENRIQUE DE OLIVEIRA",
+      "ACISSA ASTROS FUTSAL",
       3
     ],
     [
@@ -5044,15 +5044,15 @@
     [
       "Sub-09",
       "total",
-      "THOMAS MULLER DOS SANTOS SOUSA",
-      "ROSA NEGRA/IPASURE FUTSAL",
+      "PIETRO SANTOS DE OLIVEIRA",
+      "LIGA AMADORA DE ITAPEVI DE FUTSAL",
       18
     ],
     [
       "Sub-09",
       "total",
-      "PIETRO SANTOS DE OLIVEIRA",
-      "LIGA AMADORA DE ITAPEVI DE FUTSAL",
+      "THOMAS MULLER DOS SANTOS SOUSA",
+      "ROSA NEGRA/IPASURE FUTSAL",
       18
     ],
     [
@@ -5065,15 +5065,15 @@
     [
       "Sub-09",
       "total",
-      "MARCOS DAVI DE OLIVEIRA REIS",
-      "ROSA NEGRA/IPASURE FUTSAL",
+      "ARTHUR ACACIO DOS SANTOS",
+      "ASSOCIACAO ATLETICA FLAMENGO",
       17
     ],
     [
       "Sub-09",
       "total",
-      "ARTHUR ACACIO DOS SANTOS",
-      "ASSOCIACAO ATLETICA FLAMENGO",
+      "MARCOS DAVI DE OLIVEIRA REIS",
+      "ROSA NEGRA/IPASURE FUTSAL",
       17
     ],
     [
@@ -5086,13 +5086,6 @@
     [
       "Sub-09",
       "total",
-      "MURILLO LUIZ DA SILVA VALE",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
-      15
-    ],
-    [
-      "Sub-09",
-      "total",
       "PAULO HENRIQUE DE CARVALHO ÁVILA",
       "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       15
@@ -5100,15 +5093,22 @@
     [
       "Sub-09",
       "total",
-      "MIGUEL PUPO GUIMARãES",
-      "JABAQUARA ATLÉTICO CLUBE",
-      14
+      "MURILLO LUIZ DA SILVA VALE",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      15
     ],
     [
       "Sub-09",
       "total",
       "MIGUEL JULIO DE SOUZA",
       "PEQUENINOS DE PERUS",
+      14
+    ],
+    [
+      "Sub-09",
+      "total",
+      "MIGUEL PUPO GUIMARãES",
+      "JABAQUARA ATLÉTICO CLUBE",
       14
     ],
     [
@@ -5170,13 +5170,6 @@
     [
       "Sub-10",
       "uniao",
-      "BENICIO FURLAN",
-      "PROSPERE / HORTOLANDIA - B",
-      3
-    ],
-    [
-      "Sub-10",
-      "uniao",
       "ENZO DE OLIVEIRA NASCIMENTO",
       "LIGA AMADORA DE ITAPEVI DE FUTSAL",
       3
@@ -5186,6 +5179,13 @@
       "uniao",
       "PEDRO YAN CHAVES ESTRELLA",
       "SPORTING CLUB PAULINENSE",
+      3
+    ],
+    [
+      "Sub-10",
+      "uniao",
+      "BENICIO FURLAN",
+      "PROSPERE / HORTOLANDIA - B",
       3
     ],
     [
@@ -5205,13 +5205,6 @@
     [
       "Sub-10",
       "uniao",
-      "ENZO VIEIRA DOS SANTOS",
-      "GUARULHENSE/TBC TRANSPORTES",
-      3
-    ],
-    [
-      "Sub-10",
-      "uniao",
       "JOãO GOPFERT BUENO",
       "NACIONAL ATLÉTICO CLUBE",
       3
@@ -5219,8 +5212,15 @@
     [
       "Sub-10",
       "uniao",
-      "KAIQUE NUNES GARCIA",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "ENZO VIEIRA DOS SANTOS",
+      "GUARULHENSE/TBC TRANSPORTES",
+      3
+    ],
+    [
+      "Sub-10",
+      "uniao",
+      "PEDRO CAETANO DE SÁ",
+      "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
       2
     ],
     [
@@ -5282,6 +5282,13 @@
     [
       "Sub-10",
       "paulista",
+      "KAIQUE NUNES GARCIA",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      12
+    ],
+    [
+      "Sub-10",
+      "paulista",
       "JOÃO MIGUEL FERREIRA SIMÕES",
       "JABAQUARA ATLÉTICO CLUBE",
       12
@@ -5289,8 +5296,8 @@
     [
       "Sub-10",
       "paulista",
-      "KAIQUE NUNES GARCIA",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "DAVI NUNES DOMINGUES",
+      "A.E. COMPANY SPORTS",
       12
     ],
     [
@@ -5305,13 +5312,6 @@
       "paulista",
       "FELIPE JESUS FERREIRA LIMA",
       "LIGA DESPORTIVA CLASSISTA PONTO DE ENCONTRO FUTSAL",
-      12
-    ],
-    [
-      "Sub-10",
-      "paulista",
-      "DAVI NUNES DOMINGUES",
-      "A.E. COMPANY SPORTS",
       12
     ],
     [
@@ -5352,8 +5352,8 @@
     [
       "Sub-10",
       "total",
-      "DAVI LONGOBARDI MAZINI",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "",
+      "INSTITUTO F9+",
       15
     ],
     [
@@ -5366,15 +5366,15 @@
     [
       "Sub-10",
       "total",
-      "",
-      "INSTITUTO F9+",
+      "DAVI LONGOBARDI MAZINI",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       15
     ],
     [
       "Sub-10",
       "total",
-      "PEDRO HENRIQUE DO NASCIMENTO",
-      "GUAIANAZES/EVY",
+      "KAIQUE NUNES GARCIA",
+      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
       14
     ],
     [
@@ -5394,16 +5394,16 @@
     [
       "Sub-10",
       "total",
-      "KAIQUE NUNES GARCIA",
-      "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S.",
+      "DAVI NUNES DOMINGUES",
+      "A.E. COMPANY SPORTS",
       14
     ],
     [
       "Sub-10",
       "total",
-      "BENICIO FURLAN",
-      "PROSPERE / HORTOLANDIA - B",
-      13
+      "PEDRO HENRIQUE DO NASCIMENTO",
+      "GUAIANAZES/EVY",
+      14
     ],
     [
       "Sub-10",
@@ -5422,16 +5422,16 @@
     [
       "Sub-10",
       "total",
-      "HENRIQUE SIMÕES AMORIM",
-      "RESILIENCE FUTSAL",
+      "BENICIO FURLAN",
+      "PROSPERE / HORTOLANDIA - B",
       13
     ],
     [
       "Sub-10",
       "total",
-      "PEDRO MONTEIRO DE OLIVEIRA",
-      "MOGI DAS CRUZES ESPORTE CLUBE - MOGI DAS CRUZES EC",
-      12
+      "HENRIQUE SIMÕES AMORIM",
+      "RESILIENCE FUTSAL",
+      13
     ]
   ]
 }
