@@ -248,7 +248,7 @@ const ALIASES_ESCUDO = {
   "RSOCCER CFA ASSOCIAÇÃO ESPORTIVA E CULTURAL": "RSOCCER",
   "FORMAÇÃO FUTSAL CAMISA DEZ LTDA - CAMISA 10 F.C. - B": "CAMISA 10 F.C. B",  "GUARULHENSE/TBC TRANPORTES": "GUARULHENSE/TBC TRANSPORTES",
 };
-function chaveComparavel(s) { return s.replace(/ \| /g, " - ").trim().toUpperCase(); } const ESCUDOS_POR_CHAVE_NORMALIZADA = {}; const ESCUDOS_POR_CURTO_NORMALIZADO = {}; Object.keys(ESCUDOS_REAIS).forEach((chave) => { ESCUDOS_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = ESCUDOS_REAIS[chave]; ESCUDOS_POR_CURTO_NORMALIZADO[chaveComparavel(nomeCurto(chave))] = ESCUDOS_REAIS[chave]; }); const ALIASES_POR_CHAVE_NORMALIZADA = {}; Object.keys(ALIASES_ESCUDO).forEach((chave) => { ALIASES_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = ALIASES_ESCUDO[chave]; }); function buscarEscudoReal(nome) {
+function chaveComparavel(s) { return s.replace(/ \| /g, " - ").trim().toUpperCase(); } const ESCUDOS_POR_CHAVE_NORMALIZADA = {}; const ESCUDOS_POR_CURTO_NORMALIZADO = {}; Object.keys(ESCUDOS_REAIS).forEach((chave) => { ESCUDOS_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = ESCUDOS_REAIS[chave]; ESCUDOS_POR_CURTO_NORMALIZADO[chaveComparavel(nomeCurto(chave))] = ESCUDOS_REAIS[chave]; }); const ALIASES_POR_CHAVE_NORMALIZADA = {}; Object.keys(ALIASES_ESCUDO).forEach((chave) => { ALIASES_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = ALIASES_ESCUDO[chave]; }); const ALIASES_DETALHE_CATEGORIA = { "INSTITUTO OPORTUNIDADE - FORMACAO PELO ESPORTE E EDUCACAO - PEQUENINOS DE PERUS": "INSTITUTO OPORTUNIDADE FORMAÇÃO PELO ESPORTE E EDUCAÇÃO - PEQUENINOS DE PERUS", "ASSOCIAÇÃO BRASILEIRA CULTURAL E DESPORTIVA GUARULHENSE | GUARULHENSE/TBC TRANPORTES": "ASSOCIAÇÃO BRASILEIRA CULTURAL E DESPORTIVA GUARULHENSE - GUARULHENSE/TBC TRANSPORTES", }; const DETALHE_POR_CHAVE_NORMALIZADA = {}; Object.keys(DETALHE_POR_CATEGORIA).forEach((chave) => { DETALHE_POR_CHAVE_NORMALIZADA[chaveComparavel(chave)] = DETALHE_POR_CATEGORIA[chave]; }); function buscarDetalhePorCategoria(nome) { if (DETALHE_POR_CATEGORIA[nome]) return DETALHE_POR_CATEGORIA[nome]; const aliasDet = ALIASES_DETALHE_CATEGORIA[nome]; if (aliasDet && DETALHE_POR_CATEGORIA[aliasDet]) return DETALHE_POR_CATEGORIA[aliasDet]; const chaveDet = chaveComparavel(nome); if (DETALHE_POR_CHAVE_NORMALIZADA[chaveDet]) return DETALHE_POR_CHAVE_NORMALIZADA[chaveDet]; return undefined; } function buscarEscudoReal(nome) {
   if (ESCUDOS_REAIS[nome]) return ESCUDOS_REAIS[nome];
   const curto = nomeCurto(nome);
   if (ESCUDOS_REAIS[curto]) return ESCUDOS_REAIS[curto];
@@ -467,7 +467,7 @@ function TabelaAcessoA2({ rows }) {
                       <div className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Detalhe real por categoria</div>
                       <div className="flex flex-wrap gap-2">
                         {CATEGORIAS.map((cat) => (
-                          <LinhaDetalheCategoria key={cat} categoria={cat} dados={DETALHE_POR_CATEGORIA[row.nome] && DETALHE_POR_CATEGORIA[row.nome][cat]} />
+                          <LinhaDetalheCategoria key={cat} categoria={cat} dados={buscarDetalhePorCategoria(row.nome) && buscarDetalhePorCategoria(row.nome)[cat]} />
                         ))}
                       </div>
                     </td>
