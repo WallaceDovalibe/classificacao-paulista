@@ -451,7 +451,7 @@ function TabelaAcessoA2({ rows }) {
                   </td>
                   <td className="hidden lg:table-cell text-center text-xs text-slate-500">{row.avg}</td>
                   <td className="hidden lg:table-cell text-center text-xs text-slate-500">{row.it.toLocaleString("pt-BR")}</td>
-                  <td className="hidden lg:table-cell text-center text-xs text-slate-500">{row.bonifi}</td>
+                  <td className="hidden lg:table-cell text-center text-xs text-slate-500">{row.bonifi.toLocaleString("pt-BR")}</td>
                   <td className="hidden lg:table-cell text-center text-xs text-rose-500">{row.negativos}</td>
                   <td className={`text-center pr-2 ${acesso ? "font-extrabold text-base text-slate-900" : "font-bold text-slate-900"}`}>{row.total.toLocaleString("pt-BR")}</td>
                 </tr>
@@ -461,7 +461,7 @@ function TabelaAcessoA2({ rows }) {
                       <div className="flex flex-wrap gap-2 mb-2 lg:hidden text-[10px] text-slate-500">
                         <span>Avg <strong className="text-slate-700">{row.avg}</strong></span>
                         <span>IT <strong className="text-slate-700">{row.it.toLocaleString("pt-BR")}</strong></span>
-                        <span>Bonifi <strong className="text-slate-700">{row.bonifi}</strong></span>
+                        <span>Bonifi <strong className="text-slate-700">{row.bonifi.toLocaleString("pt-BR")}</strong></span>
                         <span>Negativos <strong className="text-rose-600">{row.negativos}</strong></span>
                       </div>
                       <div className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Detalhe real por categoria</div>
@@ -801,7 +801,7 @@ function AbaAcesso() {
       </div>
 
       <p className="text-[11px] text-slate-400 mb-3">
-        Soma <strong className="text-slate-200">Campeonato Paulista + Torneio União de Clubes</strong>, todas as categorias, todos os grupos. Critério oficial: TOTAL = Índice Técnico + Bonificação − Negativos. Toque numa linha para ver o detalhe por categoria.
+        Soma <strong className="text-slate-200">Campeonato Paulista + Torneio União de Clubes</strong>, todas as categorias, todos os grupos. Critério oficial: o TOTAL é calculado e publicado pela FPFS (a partir de Índice Técnico, Bonificação e Negativos) e aparece aqui exatamente como no site da federação. Toque numa linha para ver o detalhe por categoria.
       </p>
 
       <div className="rounded-xl border-2 border-emerald-400/50 bg-gradient-to-r from-emerald-500/15 to-emerald-500/5 px-3 py-3 mb-3 flex items-center gap-3 shadow-sm shadow-emerald-500/20">
