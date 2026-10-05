@@ -635,6 +635,7 @@ function construirArtilharia() {
 }
 
 let JOGOS_UNIAO = [];
+let JOGOS_PAULISTA = []; // jogos do Campeonato Paulista (grupo = fase)
 let ARTILHEIROS = [];
 
 /* ---- Cards da Aba "Jogos e Resultados" ---- */
@@ -964,6 +965,7 @@ function FiltroGrupos({ selecionados, aoAlternar, aoSelecionarTodos }) {
 function AbaJogos() {
   // Foco único: Torneio União de Clubes (sem seletor de campeonato — o
   // Paulista já encerrou a temporada). categoria=null significa "Todas".
+  const [camp, setCamp] = useState("uniao");
   const [categoria, setCategoria] = useState(null);
   const [status, setStatus] = useState("finalizado");
   const [gruposSelecionados, setGruposSelecionados] = useState(() => new Set(GRUPOS));
@@ -988,8 +990,10 @@ function AbaJogos() {
   }
 
   const porGrupo = useMemo(() => {
-    return GRUPOS.filter((g) => gruposSelecionados.has(g)).map((grupo) => {
-      const jogosDoGrupo = JOGOS_UNIAO.filter(
+    const base = camp === "paulista" ? JOGOS_PAULISTA : JOGOS_UNIAO;
+    const chaves = camp === "paulista" ? Array.from(new Set(base.map((j) => j.grupo))) : GRUPOS.filter((g) => gruposSelecionados.has(g));
+    const lista = chaves.map((grupo) => {
+      const jogosDoGrupo = base.filter(
         (j) => j.grupo === grupo && j.status === status && (categoria === null || j.categoria === categoria)
       );
       const ordenados = [...jogosDoGrupo].sort((a, b) => {
@@ -998,7 +1002,12 @@ function AbaJogos() {
       });
       return { grupo, jogos: ordenados };
     }).filter((g) => g.jogos.length > 0);
-  }, [categoria, status, gruposSelecionados]);
+    if (camp === "paulista") {
+      // fases mais recentes primeiro (resultados) ou mais próximas primeiro (agenda)
+      lista.sort((a, b) => (status === "finalizado" ? b.jogos[0].data.localeCompare(a.jogos[0].data) : a.jogos[0].data.localeCompare(b.jogos[0].data)));
+    }
+    return lista;
+  }, [camp, categoria, status, gruposSelecionados]);
 
   function alternarGrupo(grupo) {
     setGruposFechados((prev) => ({ ...prev, [grupo]: !prev[grupo] }));
@@ -1007,6 +1016,20 @@ function AbaJogos() {
   return (
     <div>
       <div className="px-3 pt-3 pb-2 sticky top-[52px] z-10 bg-slate-900/95 backdrop-blur space-y-2">
+        <div className="flex rounded-lg border border-slate-700 overflow-hidden">
+          <button
+            onClick={() => setCamp("uniao")}
+            className={`flex-1 text-xs font-semibold py-1.5 transition ${camp === "uniao" ? "bg-emerald-500 text-white" : "text-slate-400"}`}
+          >
+            Torneio União
+          </button>
+          <button
+            onClick={() => setCamp("paulista")}
+            className={`flex-1 text-xs font-semibold py-1.5 transition ${camp === "paulista" ? "bg-emerald-500 text-white" : "text-slate-400"}`}
+          >
+            Campeonato Paulista
+          </button>
+        </div>
         <div className="flex gap-1.5 overflow-x-auto pb-1">
           <button
             onClick={() => setCategoria(null)}
@@ -1028,7 +1051,7 @@ function AbaJogos() {
             </button>
           ))}
         </div>
-        <FiltroGrupos selecionados={gruposSelecionados} aoAlternar={alternarGrupoFiltro} aoSelecionarTodos={selecionarTodosGrupos} />
+        {camp === "uniao" && <FiltroGrupos selecionados={gruposSelecionados} aoAlternar={alternarGrupoFiltro} aoSelecionarTodos={selecionarTodosGrupos} />}
         <div className="flex rounded-lg border border-slate-700 overflow-hidden">
           <button
             onClick={() => setStatus("finalizado")}
@@ -1047,10 +1070,14 @@ function AbaJogos() {
 
       <div className="px-3 pt-1">
         <p className="text-[11px] text-slate-400 mb-2">
-          Foco no <strong className="text-slate-200">Torneio União de Clubes</strong> — o Campeonato Paulista já encerrou a temporada. Use o filtro de grupos para escolher quais ver; toque no cabeçalho de um grupo para recolher.
+          {camp === "paulista" ? (
+            <>Jogos do <strong className="text-slate-200">Campeonato Paulista</strong> (1ª fase e mata-mata), agrupados por fase. Toque no cabeçalho de uma fase para recolher.</>
+          ) : (
+            <>Jogos do <strong className="text-slate-200">Torneio União de Clubes</strong>. Use o filtro de grupos para escolher quais ver; toque no cabeçalho de um grupo para recolher.</>
+          )}
         </p>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md px-2 py-1 mb-3">
-          <span>✅</span><span>Dados reais — eventos.admfutsal.com.br, {textoUltimaAtualizacao()} (grade oficial "TORNEIO UNIÃO" de cada categoria: {JOGOS_UNIAO.length} jogos, resultados e agenda).</span>
+          <span>✅</span><span>Dados reais — eventos.admfutsal.com.br, {textoUltimaAtualizacao()} ({camp === "paulista" ? "Campeonato Paulista: " + JOGOS_PAULISTA.length : "grade oficial \"TORNEIO UNIÃO\" de cada categoria: " + JOGOS_UNIAO.length} jogos, resultados e agenda).</span>
         </div>
         {porGrupo.length === 0 ? (
           <p className="text-center text-xs text-slate-500 py-8">Nenhum jogo encontrado para esse filtro.</p>
@@ -1184,6 +1211,12 @@ async function iniciarApp() {
     JOGOS_UNIAO_TUPLAS = dados.jogosUniao || [];
     ARTILHEIROS_TUPLAS = dados.artilheiros || [];
     JOGOS_UNIAO = construirJogosUniao();
+    JOGOS_PAULISTA = (dados.jogosPaulista || []).map((t, i) => ({
+      id: 100000 + i,
+      categoria: t[0], grupo: t[1], status: t[2], data: t[3], hora: t[4],
+      local: t[5], mandante: t[6], visitante: t[7],
+      golsMandante: t[8], golsVisitante: t[9], wo: false,
+    }));
     ARTILHEIROS = construirArtilharia();
     window.__dadosAtualizadoEm = dados.atualizadoEm || null;
   } catch (e) {
