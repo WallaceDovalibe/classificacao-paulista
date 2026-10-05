@@ -729,40 +729,6 @@ function ListaArtilheiros({ jogadores }) {
    5) ABAS
    ============================================================ */
 
-function AbaGrupoUniao() {
-  const [categoria, setCategoria] = useState(CATEGORIAS[0]);
-  const grupos = useMemo(() => gruposDaCategoria(categoria), [categoria]);
-
-  return (
-    <div>
-      <div className="px-3 pt-3 pb-2 sticky top-[52px] z-10 bg-slate-900/95 backdrop-blur">
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {CATEGORIAS.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCategoria(c)}
-              className={`shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border transition ${
-                categoria === c ? "bg-emerald-500 text-white border-emerald-500" : "bg-transparent text-slate-300 border-slate-600"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="px-3 pt-1">
-        <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md px-2 py-1 mb-3">
-          <span>✅</span><span>Dados reais do Torneio União de Clubes — {textoUltimaAtualizacao()}.</span>
-        </div>
-        <p className="text-[11px] text-slate-400 mb-3">
-          Todos os 6 grupos de <strong className="text-slate-200">{categoria}</strong> — role a tela para ver todos.
-        </p>
-        {grupos.map((g) => <CardGrupo key={g.grupo} grupo={g.grupo} linhas={g.linhas} />)}
-      </div>
-    </div>
-  );
-}
-
 function AbaGeralUniao() {
   const rows = useMemo(() => classificacaoGeralTorneioUniao(), []);
   return (
@@ -781,8 +747,74 @@ function AbaGeralUniao() {
   );
 }
 
+function classificacaoPorCategoria(cat) {
+  return Object.keys(DETALHE_LIVE)
+    .map((nome) => {
+      const d = DETALHE_LIVE[nome] && DETALHE_LIVE[nome][cat];
+      if (!d) return null;
+      const [pg, j, v, e, dd, gp, gc, s, av, it, b8, b4, sf, fin, bf, am, vm, wo, ni] = d;
+      return { nome, pg, j, v, e, d: dd, gp, gc, sg: s, av, it, bonifi: b8 + b4 + sf + fin + bf, neg: am + vm + wo + ni };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.it - a.it || b.sg - a.sg || b.gp - a.gp)
+    .map((r, i) => ({ ...r, posicao: i + 1 }));
+}
+
+function TabelaCategoria({ rows }) {
+  return (
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table className="min-w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-slate-50 text-slate-400 text-[10px] uppercase tracking-wide">
+            <th className="w-8 py-2 text-center font-semibold">#</th>
+            <th className="py-2 pl-1 text-left font-semibold">Clube</th>
+            <th className="w-11 py-2 text-center font-semibold">Pts</th>
+            <th className="w-9 py-2 text-center font-semibold">J</th>
+            <th className="hidden sm:table-cell w-9 py-2 text-center font-semibold">V</th>
+            <th className="hidden sm:table-cell w-9 py-2 text-center font-semibold">E</th>
+            <th className="hidden sm:table-cell w-9 py-2 text-center font-semibold">D</th>
+            <th className="hidden md:table-cell w-11 py-2 text-center font-semibold">GP</th>
+            <th className="hidden md:table-cell w-11 py-2 text-center font-semibold">GC</th>
+            <th className="w-10 py-2 text-center font-semibold">SG</th>
+            <th className="w-14 py-2 text-center font-semibold">IT</th>
+            <th className="hidden sm:table-cell w-14 py-2 text-center font-semibold">Bonifi</th>
+            <th className="hidden sm:table-cell w-12 py-2 pr-2 text-center font-semibold">Neg.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.nome} className="border-t border-slate-100 hover:bg-slate-50">
+              <td className="text-center text-xs text-slate-400 font-bold">{row.posicao}</td>
+              <td className="py-1.5 pl-1">
+                <div className="flex items-center gap-2">
+                  <Escudo nome={row.nome} />
+                  <span className="font-medium text-xs sm:text-sm truncate max-w-[110px] sm:max-w-[240px] text-slate-800" title={row.nome}>{nomeCurto(row.nome)}</span>
+                </div>
+              </td>
+              <td className="text-center font-bold text-slate-900">{row.pg}</td>
+              <td className="text-center text-xs text-slate-500">{row.j}</td>
+              <td className="hidden sm:table-cell text-center text-xs text-slate-500">{row.v}</td>
+              <td className="hidden sm:table-cell text-center text-xs text-slate-500">{row.e}</td>
+              <td className="hidden sm:table-cell text-center text-xs text-slate-500">{row.d}</td>
+              <td className="hidden md:table-cell text-center text-xs text-slate-500">{row.gp}</td>
+              <td className="hidden md:table-cell text-center text-xs text-slate-500">{row.gc}</td>
+              <td className={`text-center text-xs font-medium ${row.sg > 0 ? "text-emerald-600" : row.sg < 0 ? "text-rose-600" : "text-slate-500"}`}>{row.sg > 0 ? "+" + row.sg : row.sg}</td>
+              <td className="text-center text-xs font-bold text-slate-900">{row.it.toLocaleString("pt-BR")}</td>
+              <td className="hidden sm:table-cell text-center text-xs text-slate-500">{row.bonifi.toLocaleString("pt-BR")}</td>
+              <td className={`hidden sm:table-cell text-center text-xs pr-2 ${row.neg < 0 ? "text-rose-600" : "text-slate-500"}`}>{row.neg}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function AbaAcesso() {
   const rows = useMemo(() => classificacaoAcessoA2(), []);
+  const [filtro, setFiltro] = useState("total");
+  const rowsCat = useMemo(() => (filtro === "total" ? [] : classificacaoPorCategoria(filtro)), [filtro]);
+  const filtros = [...CATEGORIAS, "total"];
   const blocos = [
     { serie: "Ouro", emoji: "🥇", faixa: "1º – 8º", de: 1, ate: 8 },
     { serie: "Prata", emoji: "🥈", faixa: "9º – 16º", de: 9, ate: 16 },
@@ -796,6 +828,30 @@ function AbaAcesso() {
         <span>✅</span><span>Dados reais — eventos.admfutsal.com.br/ranking, {textoUltimaAtualizacao()} (Série A3, Iniciação).</span>
       </div>
 
+      <div className="flex gap-1.5 overflow-x-auto pb-1 mb-3">
+        {filtros.map((f) => (
+          <button
+            key={f}
+            onClick={() => setFiltro(f)}
+            className={`shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full border transition ${
+              filtro === f ? "bg-emerald-500 text-white border-emerald-500" : "bg-transparent text-slate-300 border-slate-600"
+            }`}
+          >
+            {f === "total" ? "Total" : f}
+          </button>
+        ))}
+      </div>
+
+      {filtro !== "total" ? (
+        <>
+          <p className="text-[11px] text-slate-400 mb-3">
+            Resultados do <strong className="text-slate-200">{filtro}</strong> somando Campeonato Paulista + Torneio União de Clubes, direto da FPFS. Ordenado por Índice Técnico (IT). Bonifi e Neg. são os da categoria.
+          </p>
+          <TabelaCategoria rows={rowsCat} />
+          <p className="text-[10px] text-slate-500 mt-2">{rowsCat.length} clubes nesta categoria.</p>
+        </>
+      ) : (
+      <>
       <p className="text-[11px] text-slate-400 mb-3">
         Soma <strong className="text-slate-200">Campeonato Paulista + Torneio União de Clubes</strong>, todas as categorias, todos os grupos. Critério oficial: o TOTAL é calculado e publicado pela FPFS (a partir de Índice Técnico, Bonificação e Negativos) e aparece aqui exatamente como no site da federação. Toque numa linha para ver o detalhe por categoria.
       </p>
@@ -836,6 +892,8 @@ function AbaAcesso() {
       <p className="text-[10px] text-slate-500 mt-2">
         {rows.length} clubes no total nesta divisão · zona de acesso = 3 primeiros colocados.
       </p>
+      </>
+      )}
     </div>
   );
 }
@@ -1057,7 +1115,6 @@ function AbaArtilharia() {
 const TABS = [
   { id: "acesso", label: "Geral", icon: "🏆" },
   { id: "geral", label: "Classificação União", icon: "🥇" },
-  { id: "grupos", label: "Grupo União", icon: "▦" },
   { id: "jogos", label: "Jogos", icon: "📅" },
   { id: "artilharia", label: "Artilharia", icon: "⚽" },
 ];
@@ -1071,7 +1128,6 @@ function App() {
         <div>
           <p className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">FPFS · Sub-07 a Sub-10 · Série A3</p>
           <h1 className="text-base font-bold text-white leading-tight">
-            {tab === "grupos" && "Classificação Grupo União"}
             {tab === "geral" && "Classificação União"}
             {tab === "acesso" && "Classificação Geral"}
             {tab === "jogos" && "Resultados / Jogos"}
@@ -1086,7 +1142,6 @@ function App() {
       <main>
         {tab === "acesso" && <AbaAcesso />}
         {tab === "geral" && <AbaGeralUniao />}
-        {tab === "grupos" && <AbaGrupoUniao />}
         {tab === "jogos" && <AbaJogos />}
         {tab === "artilharia" && <AbaArtilharia />}
         <p className="text-center text-[10px] text-slate-500 mt-4 px-6">
@@ -1095,7 +1150,7 @@ function App() {
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-20 bg-slate-950/95 backdrop-blur border-t border-slate-800 safe-bottom">
-        <div className="max-w-lg mx-auto grid grid-cols-5">
+        <div className="max-w-lg mx-auto grid grid-cols-4">
           {TABS.map((t) => (
             <button
               key={t.id}
