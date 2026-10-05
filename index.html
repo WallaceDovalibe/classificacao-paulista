@@ -967,6 +967,7 @@ function AbaJogos() {
   // Paulista já encerrou a temporada). categoria=null significa "Todas".
   const [camp, setCamp] = useState("uniao");
   const [categoria, setCategoria] = useState(null);
+  const [equipe, setEquipe] = useState("");
   const [status, setStatus] = useState("finalizado");
   const [gruposSelecionados, setGruposSelecionados] = useState(() => new Set(GRUPOS));
   const [gruposFechados, setGruposFechados] = useState({});
@@ -989,12 +990,21 @@ function AbaJogos() {
     setGruposSelecionados(new Set(GRUPOS));
   }
 
+  const equipes = useMemo(() => {
+    const base = camp === "paulista" ? JOGOS_PAULISTA : JOGOS_UNIAO;
+    const s = new Set();
+    base.forEach((j) => { if (j.mandante) s.add(j.mandante); if (j.visitante) s.add(j.visitante); });
+    return Array.from(s).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [camp]);
+  const equipeAtiva = equipes.includes(equipe) ? equipe : "";
+
   const porGrupo = useMemo(() => {
     const base = camp === "paulista" ? JOGOS_PAULISTA : JOGOS_UNIAO;
     const chaves = camp === "paulista" ? Array.from(new Set(base.map((j) => j.grupo))) : GRUPOS.filter((g) => gruposSelecionados.has(g));
     const lista = chaves.map((grupo) => {
       const jogosDoGrupo = base.filter(
-        (j) => j.grupo === grupo && j.status === status && (categoria === null || j.categoria === categoria)
+        (j) => j.grupo === grupo && j.status === status && (categoria === null || j.categoria === categoria) &&
+          (!equipeAtiva || j.mandante === equipeAtiva || j.visitante === equipeAtiva)
       );
       const ordenados = [...jogosDoGrupo].sort((a, b) => {
         const porData = status === "finalizado" ? b.data.localeCompare(a.data) : a.data.localeCompare(b.data);
@@ -1007,7 +1017,7 @@ function AbaJogos() {
       lista.sort((a, b) => (status === "finalizado" ? b.jogos[0].data.localeCompare(a.jogos[0].data) : a.jogos[0].data.localeCompare(b.jogos[0].data)));
     }
     return lista;
-  }, [camp, categoria, status, gruposSelecionados]);
+  }, [camp, categoria, status, gruposSelecionados, equipeAtiva]);
 
   function alternarGrupo(grupo) {
     setGruposFechados((prev) => ({ ...prev, [grupo]: !prev[grupo] }));
@@ -1051,6 +1061,16 @@ function AbaJogos() {
             </button>
           ))}
         </div>
+        <select
+          value={equipeAtiva}
+          onChange={(e) => setEquipe(e.target.value)}
+          className="w-full text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-600 rounded-lg px-3 py-2"
+        >
+          <option value="">Todas as equipes</option>
+          {equipes.map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
         {camp === "uniao" && <FiltroGrupos selecionados={gruposSelecionados} aoAlternar={alternarGrupoFiltro} aoSelecionarTodos={selecionarTodosGrupos} />}
         <div className="flex rounded-lg border border-slate-700 overflow-hidden">
           <button
