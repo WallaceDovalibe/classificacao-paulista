@@ -116,7 +116,7 @@ function classificacaoGeralTorneioUniao() {
    Confirmado batendo com os 30 TOTALs publicados pela FPFS.
    ============================================================ */
 
-let RANKING_A3 = []; // populado em runtime a partir de dados.json
+let DETALHE_LIVE = {}; let RANKING_A3 = []; // populado em runtime a partir de dados.json
 
 // Detalhe real por categoria (Sub-07..Sub-10) para cada um dos 30 clubes acima.
 // Formato por sub: [v, e, d, gp, gc]. Fonte: mesma página /ranking (tabela aninhada).
@@ -374,7 +374,25 @@ function CardGrupo({ grupo, linhas }) {
 
 /* ---- Tabela expansível da Aba 3 (Acesso A2), com todas as colunas do site ---- */
 
-function LinhaDetalheCategoria({ categoria, dados }) {
+function LinhaDetalheCategoria({ categoria, dados, live }) {
+  if (live) {
+    // Dados reais da FPFS: [PG,J,V,E,D,GP,GC,S,AV,IT,8as,4as,SF,Fin,BF,AM,VM,WO,NI]
+    const [pg, j, v, e, d, gp, gc, s, av, it, b8, b4, sf, fin, bf, am, vm, wo, ni] = live;
+    const bonus = b8 + b4 + sf + fin + bf;
+    const neg = am + vm + wo + ni;
+    const partes = [["8as", b8], ["4as", b4], ["SF", sf], ["Fin", fin], ["BF", bf]].filter((p) => p[1]).map((p) => p[0] + " " + p[1]).join(" · ");
+    return (
+      <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-center min-w-[110px]">
+        <div className="text-[10px] font-bold text-slate-500 mb-1">{categoria}</div>
+        <div className="text-sm font-extrabold text-slate-900">{pg} <span className="text-[9px] font-normal text-slate-400">pts</span></div>
+        <div className="text-[10px] text-slate-500">{j}J · {v}V {e}E {d}D</div>
+        <div className="text-[10px] text-slate-500">{gp}:{gc} <span className={s >= 0 ? "text-emerald-600" : "text-rose-600"}>({s > 0 ? "+" + s : s})</span></div>
+        <div className="text-[9px] text-slate-400 mt-0.5">Avg {av} · IT {it.toLocaleString("pt-BR")}</div>
+        <div className="text-[10px] text-slate-600 mt-1">Bonifi <strong className="text-emerald-700">{bonus.toLocaleString("pt-BR")}</strong> · Neg <strong className={neg < 0 ? "text-rose-600" : "text-slate-600"}>{neg}</strong></div>
+        {partes ? <div className="text-[9px] text-slate-400">{partes}</div> : null}
+      </div>
+    );
+  }
   if (!dados) return null;
   const [v, e, d, gp, gc] = dados;
   const der = calcDerivados(v, e, d, gp, gc);
@@ -467,7 +485,7 @@ function TabelaAcessoA2({ rows }) {
                       <div className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Detalhe real por categoria</div>
                       <div className="flex flex-wrap gap-2">
                         {CATEGORIAS.map((cat) => (
-                          <LinhaDetalheCategoria key={cat} categoria={cat} dados={buscarDetalhePorCategoria(row.nome) && buscarDetalhePorCategoria(row.nome)[cat]} />
+                          <LinhaDetalheCategoria key={cat} categoria={cat} live={DETALHE_LIVE[row.nome] && DETALHE_LIVE[row.nome][cat]} dados={buscarDetalhePorCategoria(row.nome) && buscarDetalhePorCategoria(row.nome)[cat]} />
                         ))}
                       </div>
                     </td>
@@ -1101,6 +1119,7 @@ async function iniciarApp() {
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const dados = await resp.json();
     RANKING_A3 = dados.rankingGeral || [];
+    DETALHE_LIVE = dados.detalheCategoria || {};
     TORNEIO_UNIAO = dados.torneioUniao || {};
     CATEGORIAS.forEach((cat) => {
       if (!TORNEIO_UNIAO[cat]) TORNEIO_UNIAO[cat] = {};
