@@ -773,7 +773,7 @@ function AbaGeralUniao() {
       <p className="text-[11px] text-slate-400 mb-3">
         Ranking somando Sub-07 + Sub-08 + Sub-09 + Sub-10 de todos os grupos do Torneio União.
         <span className="block text-amber-400/80 mt-0.5">⚠️ Consolidação feita pelo app a partir dos dados oficiais por grupo.</span>
-        <span className="block text-sky-300/80 mt-0.5">ℹ️ O mata-mata do Torneio União agora é definido pela classificação da aba "Geral", e não por esta tabela. A divisão em Séries (Ouro, Prata, Bronze e Rubi) está na aba "Classificação União".</span>
+        <span className="block text-sky-300/80 mt-0.5">ℹ️ O mata-mata do Torneio União agora é definido pela classificação da aba "Geral" (com as Séries Ouro, Prata, Bronze e Rubi), e não por esta tabela.</span>
         <span className="block text-slate-500 mt-0.5">ℹ️ O "J" (jogos) soma as 4 categorias, mas o calendário de cada uma anda em ritmo diferente, então o total de jogos por clube pode não ser igual entre eles.</span>
       </p>
       <TabelaClassificacao rows={rows} modoDestaque={null} />
@@ -781,54 +781,14 @@ function AbaGeralUniao() {
   );
 }
 
-function AbaClassificacaoUniao() {
-  const rows = useMemo(() => classificacaoGeralTorneioUniao(), []);
-  const blocos = [
-    { serie: "Ouro", emoji: "🥇", faixa: "1º – 8º" },
-    { serie: "Prata", emoji: "🥈", faixa: "9º – 16º" },
-    { serie: "Bronze", emoji: "🥉", faixa: "17º – 24º" },
-    { serie: "Rubi", emoji: "💎", faixa: "25º +" },
-  ];
-
-  return (
-    <div className="px-3 pt-3">
-      <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md px-2 py-1 mb-3">
-        <span>✅</span><span>Dados reais do Torneio União de Clubes — {textoUltimaAtualizacao()}.</span>
-      </div>
-      <p className="text-[11px] text-slate-400 mb-3">
-        Ranking somando Sub-07 + Sub-08 + Sub-09 + Sub-10 de todos os grupos do Torneio União.
-        <span className="block text-amber-400/80 mt-0.5">⚠️ Consolidação feita pelo app a partir dos dados oficiais por grupo — divisão em Séries é um critério visual nosso, em blocos de 8.</span>
-        <span className="block text-slate-500 mt-0.5">ℹ️ O "J" (jogos) soma as 4 categorias, mas o calendário de cada uma anda em ritmo diferente — hoje Sub-09 e Sub-10 têm menos rodadas disputadas que Sub-07 e Sub-08, então o total de jogos por clube ainda não é igual entre eles.</span>
-      </p>
-
-      <div className="flex gap-2 mb-3">
-        {blocos.map((b) => (
-          <div key={b.serie} className={`flex-1 rounded-lg border px-2 py-1.5 text-center ${estiloSerie(b.serie).chip}`}>
-            <div className="text-xs font-bold">{b.emoji} {b.serie}</div>
-            <div className="text-[10px] opacity-80">{b.faixa}</div>
-          </div>
-        ))}
-      </div>
-
-      {blocos.map((b) => {
-        const linhasDoBloco = rows.filter((r) => r.serie === b.serie);
-        if (linhasDoBloco.length === 0) return null;
-        return (
-          <div key={b.serie} className="mb-4">
-            <div className={`flex items-center gap-1.5 px-1 mb-1.5 text-xs font-bold ${estiloSerie(b.serie).chip.split(" ")[1]}`}>
-              <span className={`w-2 h-2 rounded-full ${estiloSerie(b.serie).bar}`}></span>
-              Série {b.serie}
-            </div>
-            <TabelaClassificacao rows={linhasDoBloco} modoDestaque="serie" />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 function AbaAcesso() {
   const rows = useMemo(() => classificacaoAcessoA2(), []);
+  const blocos = [
+    { serie: "Ouro", emoji: "🥇", faixa: "1º – 8º", de: 1, ate: 8 },
+    { serie: "Prata", emoji: "🥈", faixa: "9º – 16º", de: 9, ate: 16 },
+    { serie: "Bronze", emoji: "🥉", faixa: "17º – 24º", de: 17, ate: 24 },
+    { serie: "Rubi", emoji: "💎", faixa: "25º +", de: 25, ate: 999 },
+  ];
 
   return (
     <div className="px-3 pt-3">
@@ -848,7 +808,30 @@ function AbaAcesso() {
         </div>
       </div>
 
-      <TabelaAcessoA2 rows={rows} />
+      <p className="text-[11px] text-amber-400/80 mb-2">⚠️ O mata-mata do Torneio União é definido por esta classificação geral. A divisão em Séries (Ouro, Prata, Bronze e Rubi) é feita em blocos de 8 posições.</p>
+
+      <div className="flex gap-2 mb-3">
+        {blocos.map((b) => (
+          <div key={b.serie} className={`flex-1 rounded-lg border px-2 py-1.5 text-center ${estiloSerie(b.serie).chip}`}>
+            <div className="text-xs font-bold">{b.emoji} {b.serie}</div>
+            <div className="text-[10px] opacity-80">{b.faixa}</div>
+          </div>
+        ))}
+      </div>
+
+      {blocos.map((b) => {
+        const linhasDoBloco = rows.filter((r) => r.posicao >= b.de && r.posicao <= b.ate);
+        if (linhasDoBloco.length === 0) return null;
+        return (
+          <div key={b.serie} className="mb-4">
+            <div className={`flex items-center gap-1.5 px-1 mb-1.5 text-xs font-bold ${estiloSerie(b.serie).chip.split(" ")[1]}`}>
+              <span className={`w-2 h-2 rounded-full ${estiloSerie(b.serie).bar}`}></span>
+              Série {b.serie}
+            </div>
+            <TabelaAcessoA2 rows={linhasDoBloco} />
+          </div>
+        );
+      })}
 
       <p className="text-[10px] text-slate-500 mt-2">
         {rows.length} clubes no total nesta divisão · zona de acesso = 3 primeiros colocados.
@@ -1073,8 +1056,7 @@ function AbaArtilharia() {
 
 const TABS = [
   { id: "acesso", label: "Geral", icon: "🏆" },
-  { id: "geral", label: "Geral União", icon: "🥇" },
-  { id: "classificacao", label: "Classificação União", icon: "🏅" },
+  { id: "geral", label: "Classificação União", icon: "🥇" },
   { id: "grupos", label: "Grupo União", icon: "▦" },
   { id: "jogos", label: "Jogos", icon: "📅" },
   { id: "artilharia", label: "Artilharia", icon: "⚽" },
@@ -1090,8 +1072,7 @@ function App() {
           <p className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">FPFS · Sub-07 a Sub-10 · Série A3</p>
           <h1 className="text-base font-bold text-white leading-tight">
             {tab === "grupos" && "Classificação Grupo União"}
-            {tab === "geral" && "Classificação Geral União"}
-            {tab === "classificacao" && "Classificação União"}
+            {tab === "geral" && "Classificação União"}
             {tab === "acesso" && "Classificação Geral"}
             {tab === "jogos" && "Resultados / Jogos"}
             {tab === "artilharia" && "Artilharia"}
@@ -1105,7 +1086,6 @@ function App() {
       <main>
         {tab === "acesso" && <AbaAcesso />}
         {tab === "geral" && <AbaGeralUniao />}
-        {tab === "classificacao" && <AbaClassificacaoUniao />}
         {tab === "grupos" && <AbaGrupoUniao />}
         {tab === "jogos" && <AbaJogos />}
         {tab === "artilharia" && <AbaArtilharia />}
@@ -1115,7 +1095,7 @@ function App() {
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-20 bg-slate-950/95 backdrop-blur border-t border-slate-800 safe-bottom">
-        <div className="max-w-lg mx-auto grid grid-cols-6">
+        <div className="max-w-lg mx-auto grid grid-cols-5">
           {TABS.map((t) => (
             <button
               key={t.id}
