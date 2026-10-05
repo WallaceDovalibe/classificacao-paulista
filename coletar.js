@@ -138,17 +138,32 @@ async function acharAbaPorTexto(page, textoParcial) {
     const linhas = Array.from(t.querySelectorAll(":scope > tbody > tr")).filter(
       (tr) => tr.querySelectorAll(":scope > td").length === 16
     );
+    const detalheDe = (tr) => {
+      const nt = tr.nextElementSibling && tr.nextElementSibling.querySelector("table");
+      if (!nt) return {};
+      const out = {};
+      Array.from(nt.querySelectorAll("tbody tr")).forEach((r) => {
+        const c = Array.from(r.querySelectorAll("td")).map((td) => td.textContent.trim());
+        if (c.length < 20) return;
+        const cat = c[0].replace(/^Sub-(\d)$/, "Sub-0$1");
+        // [PG,J,V,E,D,GP,GC,S,AV,IT,8as,4as,SF,Fin,BF,AM,VM,WO,NI]
+        out[cat] = c.slice(1).map((x, i) => (i === 8 ? parseFloat(x) || 0 : parseInt(x.replace(/[,.]/g, ""), 10) || 0));
+      });
+      return out;
+    };
     return linhas.map((tr) => {
       const tds = tr.querySelectorAll(":scope > td");
       const num = (i) => parseInt(tds[i].textContent.trim().replace(/[,.]/g, ""), 10) || 0;
       return {
         clube: tds[1].textContent.trim(),
         v: num(4), e: num(5), d: num(6), gp: num(7), gc: num(8),
-        bonifi: num(12), total: num(14), negativos: parseInt(tds[13].textContent.trim().replace(/[,.]/g, ""), 10) || 0,
+        bonifi: num(12), total: num(14), detalhe: detalheDe(tr), negativos: parseInt(tds[13].textContent.trim().replace(/[,.]/g, ""), 10) || 0,
       };
     });
   });
   dados.rankingGeral = rankingBruto.map((r) => [normalizarClube(r.clube), r.v, r.e, r.d, r.gp, r.gc, r.negativos, r.bonifi, r.total]);
+  dados.detalheCategoria = {}; // { clube: { "Sub-07": [PG,J,V,E,D,GP,GC,S,AV,IT,8as,4as,SF,Fin,BF,AM,VM,WO,NI], ... } }
+  rankingBruto.forEach((r) => { dados.detalheCategoria[normalizarClube(r.clube)] = r.detalhe; });
 
   // ---- 2) Classificação por grupo do Torneio União + Jogos + Artilharia, por categoria ----
   for (const [categoria, eventoId] of Object.entries(EVENTOS)) {
