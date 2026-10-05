@@ -225,9 +225,9 @@ async function acharAbaPorTexto(page, textoParcial) {
 
     const totalRanking = [...geralTop].sort((a, b) => b.gols - a.gols);
 
-    uniaoRanking.forEach((j) => dados.artilheiros.push([categoria, "uniao", j.jogador, j.clube, j.gols]));
-    paulistaRanking.forEach((j) => dados.artilheiros.push([categoria, "paulista", j.jogador, j.clube, j.gols]));
-    totalRanking.forEach((j) => dados.artilheiros.push([categoria, "total", j.jogador, j.clube, j.gols]));
+    uniaoRanking.slice(0, 100).forEach((j) => dados.artilheiros.push([categoria, "uniao", j.jogador, j.clube, j.gols]));
+    paulistaRanking.slice(0, 100).forEach((j) => dados.artilheiros.push([categoria, "paulista", j.jogador, j.clube, j.gols]));
+    totalRanking.slice(0, 100).forEach((j) => dados.artilheiros.push([categoria, "total", j.jogador, j.clube, j.gols]));
   }
 
   fs.writeFileSync("dados.json", JSON.stringify(dados, null, 2));
