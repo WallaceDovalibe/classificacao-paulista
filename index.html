@@ -163,10 +163,10 @@ function calcDerivados(v, e, d, gp, gc) {
 }
 
 function classificacaoAcessoA2() {
-  const rows = RANKING_A3.map(([nome, v, e, d, gp, gc, negativos]) => {
+  const rows = RANKING_A3.map(([nome, v, e, d, gp, gc, negativos, bonifiFpfs, totalFpfs]) => {
     const der = calcDerivados(v, e, d, gp, gc);
-    const bonifi = 0;
-    const total = der.it + bonifi + negativos;
+    const bonifi = bonifiFpfs || 0;
+    const total = (typeof totalFpfs === "number" && totalFpfs > 0) ? totalFpfs : (der.it + bonifi + negativos);
     return { nome, clube: nome, v, e, d, gp, gc, negativos, bonifi, ...der, total };
   });
   const ordenado = [...rows].sort((a, b) => b.total - a.total);
