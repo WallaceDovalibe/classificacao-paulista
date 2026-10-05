@@ -198,7 +198,7 @@ async function acharAbaPorTexto(page, textoParcial) {
     // Artilharia: "Geral" (Paulista+União já somados pela FPFS) + cada grupo da União
     await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}/artilharia`, { waitUntil: "networkidle" });
     const geralId = await acharAbaPorTexto(page, "Geral");
-    const geralTop = (await extrairArtilharia(page, geralId)).slice(0, 30); // top 30 de "buffer" (times 15 exibidos)
+    const geralTop = await extrairArtilharia(page, geralId); // lista completa (a FPFS mostra todos os artilheiros numa página só)
     geralTop.forEach((g) => (g.clube = normalizarClube(g.clube)));
 
     const uniaoPorJogador = new Map();
@@ -225,9 +225,9 @@ async function acharAbaPorTexto(page, textoParcial) {
 
     const totalRanking = [...geralTop].sort((a, b) => b.gols - a.gols);
 
-    uniaoRanking.slice(0, 15).forEach((j) => dados.artilheiros.push([categoria, "uniao", j.jogador, j.clube, j.gols]));
-    paulistaRanking.slice(0, 15).forEach((j) => dados.artilheiros.push([categoria, "paulista", j.jogador, j.clube, j.gols]));
-    totalRanking.slice(0, 15).forEach((j) => dados.artilheiros.push([categoria, "total", j.jogador, j.clube, j.gols]));
+    uniaoRanking.forEach((j) => dados.artilheiros.push([categoria, "uniao", j.jogador, j.clube, j.gols]));
+    paulistaRanking.forEach((j) => dados.artilheiros.push([categoria, "paulista", j.jogador, j.clube, j.gols]));
+    totalRanking.forEach((j) => dados.artilheiros.push([categoria, "total", j.jogador, j.clube, j.gols]));
   }
 
   fs.writeFileSync("dados.json", JSON.stringify(dados, null, 2));
