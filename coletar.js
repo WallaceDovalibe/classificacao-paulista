@@ -48,6 +48,20 @@ async function extrairTabelaClassificacao(page, containerId) {
   });
 }
 
+// Nome amigável da fase do Campeonato Paulista a partir do texto da aba
+// (ex.: "QUARTAS DE FINAIS - BRONE" -> "Quartas de Final · Bronze").
+function nomeFase(texto) {
+  const t = texto.toUpperCase();
+  let base = "Fase";
+  if (t.includes("1ª FASE") || t.includes("1A FASE")) return "1ª Fase";
+  if (t.includes("QUARTAS")) base = "Quartas de Final";
+  else if (t.includes("SEMIFINAL")) base = "Semifinal";
+  else if (t.includes("FINAL")) base = "Final";
+  else return texto.trim();
+  const serie = t.includes("OURO") ? "Ouro" : t.includes("PRATA") ? "Prata" : t.includes("BRONZE") || t.includes("BRONE") ? "Bronze" : t.includes("RUBI") ? "Rubi" : "";
+  return serie ? base + " · " + serie : base;
+}
+
 async function extrairJogos(page, containerId, categoria, grupo) {
   return page.$eval(
     `#${containerId}`,
@@ -119,6 +133,7 @@ async function acharAbaPorTexto(page, textoParcial) {
     torneioUniao: {}, // { "Sub-07": { "Grupo 1": [[clube,v,e,d,gp,gc],...], ... }, ... }
     jogosUniao: [], // [ [categoria,grupo,status,data,horario,local,mandante,visitante,golsMandante,golsVisitante], ... ]
     artilheiros: [], // [ [categoria,campeonato,jogador,clube,gols], ... ]
+    jogosPaulista: [], // [ [categoria,fase,status,data,horario,local,mandante,visitante,golsMandante,golsVisitante], ... ]
   };
 
   // ---- 1) Classificação Geral (Acesso A2 = Paulista + União combinados) ----
@@ -191,6 +206,23 @@ async function acharAbaPorTexto(page, textoParcial) {
         dados.jogosUniao.push([
           j.categoria, j.grupo, j.status, j.data, j.horario, j.local,
           j.mandante, j.visitante, j.golsMandante, j.golsVisitante,
+        ]);
+      });
+    }
+
+    // Jogos do Campeonato Paulista (1ª fase + mata-mata): todas as abas da
+    // página /jogos que NÃO são do Torneio União (ainda na mesma página).
+    const abasPaulista = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[role="tab"]')).map((t) => ({ texto: t.textContent.trim(), id: t.getAttribute("href").slice(1) }))
+    );
+    for (const aba of abasPaulista) {
+      if (/TORNEIO UNI/i.test(aba.texto)) continue;
+      const fase = nomeFase(aba.texto);
+      const jogosP = await extrairJogos(page, aba.id, categoria, fase);
+      jogosP.forEach((j) => {
+        dados.jogosPaulista.push([
+          j.categoria, j.grupo, j.status, j.data, j.horario, j.local,
+          normalizarClube(j.mandante), normalizarClube(j.visitante), j.golsMandante, j.golsVisitante,
         ]);
       });
     }
