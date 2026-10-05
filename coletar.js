@@ -144,11 +144,11 @@ async function acharAbaPorTexto(page, textoParcial) {
       return {
         clube: tds[1].textContent.trim(),
         v: num(4), e: num(5), d: num(6), gp: num(7), gc: num(8),
-        negativos: parseInt(tds[13].textContent.trim().replace(/[,.]/g, ""), 10) || 0,
+        bonifi: num(12), total: num(14), negativos: parseInt(tds[13].textContent.trim().replace(/[,.]/g, ""), 10) || 0,
       };
     });
   });
-  dados.rankingGeral = rankingBruto.map((r) => [normalizarClube(r.clube), r.v, r.e, r.d, r.gp, r.gc, r.negativos]);
+  dados.rankingGeral = rankingBruto.map((r) => [normalizarClube(r.clube), r.v, r.e, r.d, r.gp, r.gc, r.negativos, r.bonifi, r.total]);
 
   // ---- 2) Classificação por grupo do Torneio União + Jogos + Artilharia, por categoria ----
   for (const [categoria, eventoId] of Object.entries(EVENTOS)) {
