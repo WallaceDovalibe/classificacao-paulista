@@ -1201,7 +1201,7 @@ function construirConfrontosMM() {
 function montarChaveMM(confrontos, serie) {
   var ties = confrontos.filter(function (c) { return c.serie === serie; });
   var slots = [];
-  for (var i = 1; i <= 12; i++) slots.push({ n: i, tie: null });
+  for (var i = 1; i <= 12; i++) slots.push({ n: i, tie: null, serie: serie });
   // Jogos numerados na ordem da classificação Geral (melhor colocado do confronto primeiro).
   var porFase = function (fases) {
     return ties
@@ -1210,7 +1210,8 @@ function montarChaveMM(confrontos, serie) {
   };
   porFase(["Oitavas", "Quartas"]).slice(0, 4).forEach(function (c, k) { slots[k].tie = c; });
   porFase(["Semifinal"]).slice(0, 4).forEach(function (c, k) { slots[4 + k].tie = c; });
-  porFase(["Final"]).slice(0, 4).forEach(function (c, k) { slots[8 + k].tie = c; });
+  var idxFinais = [8, 10, 9, 11]; // J9 (1º/2º), J11 (3º/4º), J10 (5º/6º), J12 (7º/8º)
+  porFase(["Final"]).slice(0, 4).forEach(function (c, k) { slots[idxFinais[k]].tie = c; });
   return slots;
 }
 
@@ -1251,6 +1252,7 @@ function NoChaveMM({ slot }) {
   var cab = (
     <div className="flex items-center justify-between mb-1">
       <span className="text-[9px] font-black text-emerald-400">J{slot.n}</span>
+      {posFinalMM(slot.n, slot.serie) ? <span className="text-[8px] uppercase tracking-wide text-slate-500 font-bold">{posFinalMM(slot.n, slot.serie)}</span> : null}
     </div>
   );
   if (!c) {
@@ -1278,7 +1280,7 @@ function ChaveMM({ slots }) {
   var ordem = {
     "Quartas de final": [1, 2, 3, 4],
     "Semifinais": [5, 6, 7, 8],
-    "Finais": [9, 10, 11, 12],
+    "Finais": [9, 11, 10, 12],
   };
   return (
     <div className="mb-4">
@@ -1381,6 +1383,7 @@ function CardConfrontoMM({ slot }) {
           <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.fase} · {c.serie}</span>
           <span className="text-slate-400">{c.decididos}/4 subs decididos</span>
         </div>
+        {disputaMM(slot.n, c.serie) ? <div className={"text-center text-[11px] font-bold mb-2 " + st.text}>{disputaMM(slot.n, c.serie)}</div> : null}
         <div className="flex items-center gap-2">
           <LadoClubeMM nome={c.a} pos={c.posA} cor="bg-sky-500/15 text-sky-300 border-sky-400/30" />
           <div className="text-center shrink-0 px-1">
@@ -1472,8 +1475,21 @@ function faseAtualMM(confrontos) {
 const FASES_SEL_MM = [
   { id: "Quartas", titulo: "Quartas", nome: "Quartas", nums: [1, 2, 3, 4], espera: "Aguardando a FPFS publicar este confronto" },
   { id: "Semifinal", titulo: "Semifinais", nome: "Semifinal", nums: [5, 6, 7, 8], espera: "Aguardando o resultado das quartas de final" },
-  { id: "Final", titulo: "Finais", nome: "Final", nums: [9, 10, 11, 12], espera: "Aguardando o resultado das semifinais" },
+  { id: "Final", titulo: "Finais", nome: "Final", nums: [9, 11, 10, 12], espera: "Aguardando o resultado das semifinais" },
 ];
+
+function posFinalMM(n, serie) {
+  var mapa = { 9: [1, 2], 11: [3, 4], 10: [5, 6], 12: [7, 8] };
+  var p = mapa[n];
+  if (!p) return null;
+  var base = Math.max(0, SERIES_MM.indexOf(serie)) * 8;
+  return (base + p[0]) + "º e " + (base + p[1]) + "º";
+}
+
+function disputaMM(n, serie) {
+  var p = posFinalMM(n, serie);
+  return p ? "Disputa do " + p + " lugar" : null;
+}
 
 function CardADefinirMM({ slot, serie, fase }) {
   var st = SERIE_MM_STYLE[serie] || SERIE_MM_STYLE.Ouro;
@@ -1488,6 +1504,7 @@ function CardADefinirMM({ slot, serie, fase }) {
           <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>
           <div className="flex-1 text-center">
             <div className="text-sm font-black text-slate-300">Confronto a definir</div>
+            {disputaMM(slot.n, serie) ? <div className={"text-[11px] font-bold mt-0.5 " + st.text}>{disputaMM(slot.n, serie)}</div> : null}
             <div className="text-[10px] text-slate-500 mt-0.5">{fase.espera}</div>
           </div>
           <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>
@@ -1496,35 +1513,6 @@ function CardADefinirMM({ slot, serie, fase }) {
       <div className="bg-slate-950/30 border-t border-white/5 px-2.5 py-2.5 space-y-1.5 opacity-60">
         {CATEGORIAS.map(function (cat) {
           return <LinhaSubMM key={cat} s={{ categoria: cat, ida: null, volta: null, ga: 0, gb: 0, jogados: 0, decidido: false, vencedor: null }} />;
-        })}
-      </div>
-    </div>
-  );
-}
-
-function ClassificacaoFinalMM({ serie }) {
-  var st = SERIE_MM_STYLE[serie] || SERIE_MM_STYLE.Ouro;
-  var base = Math.max(0, SERIES_MM.indexOf(serie)) * 8;
-  var n = Math.max(0, Math.min(8, RANKING_A3.length - base));
-  var medalhas = serie === "Ouro" ? ["🥇", "🥈", "🥉"] : [];
-  var linhas = [];
-  for (var i = 0; i < n; i++) linhas.push(i);
-  if (n === 0) return null;
-  return (
-    <div className={"rounded-2xl border overflow-hidden mt-1 mb-3 " + st.ring}>
-      <div className="px-3 py-2 bg-slate-800/60 flex items-center justify-between">
-        <span className={"text-[10px] font-bold uppercase tracking-wider " + st.text}>{st.icon} Classificação final · Série {serie}</span>
-        <span className="text-[9px] text-slate-500">preenche após as finais</span>
-      </div>
-      <div className="divide-y divide-slate-700/50">
-        {linhas.map(function (i) {
-          return (
-            <div key={i} className="flex items-center gap-2 px-3 py-2">
-              <span className="w-9 text-xs font-black text-slate-300 tabular-nums">{base + i + 1}º</span>
-              <span className="w-5 text-sm">{medalhas[i] || ""}</span>
-              <span className="text-xs text-slate-500 italic">a definir</span>
-            </div>
-          );
         })}
       </div>
     </div>
@@ -1646,7 +1634,6 @@ function AbaMataMata() {
               : <CardADefinirMM key={n} slot={s} serie={serie} fase={faseSel} />;
           })}
 
-          <ClassificacaoFinalMM serie={serie} />
           <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem vencer mais subs no confronto; empate nas vitórias, decide o saldo de gols somado dos 4 subs.</p>
         </div>
       ) : (
