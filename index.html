@@ -1458,9 +1458,83 @@ function AgendaMM({ jogos }) {
   );
 }
 
+function faseAtualMM(confrontos) {
+  var ordem = ["Quartas", "Semifinal", "Final"];
+  for (var k = 0; k < ordem.length; k++) {
+    var ts = confrontos.filter(function (c) {
+      return ordem[k] === "Quartas" ? (c.fase === "Quartas" || c.fase === "Oitavas") : c.fase === ordem[k];
+    });
+    if (ts.length === 0 || ts.some(function (c) { return c.decididos < 4; })) return ordem[k];
+  }
+  return "Final";
+}
+
+const FASES_SEL_MM = [
+  { id: "Quartas", titulo: "Quartas", nome: "Quartas", nums: [1, 2, 3, 4], espera: "Aguardando a FPFS publicar este confronto" },
+  { id: "Semifinal", titulo: "Semifinais", nome: "Semifinal", nums: [5, 6, 7, 8], espera: "Aguardando o resultado das quartas de final" },
+  { id: "Final", titulo: "Finais", nome: "Final", nums: [9, 10, 11, 12], espera: "Aguardando o resultado das semifinais" },
+];
+
+function CardADefinirMM({ slot, serie, fase }) {
+  var st = SERIE_MM_STYLE[serie] || SERIE_MM_STYLE.Ouro;
+  return (
+    <div className={"rounded-2xl border border-dashed bg-slate-800/30 mb-3 overflow-hidden " + st.ring}>
+      <div className="px-3 pt-3 pb-2.5">
+        <div className="flex items-center justify-between text-[10px] mb-2.5">
+          <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {fase.nome} · {serie}</span>
+          <span className="text-slate-500">0/4 subs decididos</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>
+          <div className="flex-1 text-center">
+            <div className="text-sm font-black text-slate-300">Confronto a definir</div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{fase.espera}</div>
+          </div>
+          <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>
+        </div>
+      </div>
+      <div className="bg-slate-950/30 border-t border-white/5 px-2.5 py-2.5 space-y-1.5 opacity-60">
+        {CATEGORIAS.map(function (cat) {
+          return <LinhaSubMM key={cat} s={{ categoria: cat, ida: null, volta: null, ga: 0, gb: 0, jogados: 0, decidido: false, vencedor: null }} />;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ClassificacaoFinalMM({ serie }) {
+  var st = SERIE_MM_STYLE[serie] || SERIE_MM_STYLE.Ouro;
+  var base = Math.max(0, SERIES_MM.indexOf(serie)) * 8;
+  var n = Math.max(0, Math.min(8, RANKING_A3.length - base));
+  var medalhas = serie === "Ouro" ? ["🥇", "🥈", "🥉"] : [];
+  var linhas = [];
+  for (var i = 0; i < n; i++) linhas.push(i);
+  if (n === 0) return null;
+  return (
+    <div className={"rounded-2xl border overflow-hidden mt-1 mb-3 " + st.ring}>
+      <div className="px-3 py-2 bg-slate-800/60 flex items-center justify-between">
+        <span className={"text-[10px] font-bold uppercase tracking-wider " + st.text}>{st.icon} Classificação final · Série {serie}</span>
+        <span className="text-[9px] text-slate-500">preenche após as finais</span>
+      </div>
+      <div className="divide-y divide-slate-700/50">
+        {linhas.map(function (i) {
+          return (
+            <div key={i} className="flex items-center gap-2 px-3 py-2">
+              <span className="w-9 text-xs font-black text-slate-300 tabular-nums">{base + i + 1}º</span>
+              <span className="w-5 text-sm">{medalhas[i] || ""}</span>
+              <span className="text-xs text-slate-500 italic">a definir</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AbaMataMata() {
   const [serie, setSerie] = useState("Ouro");
   const [visao, setVisao] = useState("confrontos");
+  const [fase, setFase] = useState(function () { return faseAtualMM(construirConfrontosMM()); });
   const [agora, setAgora] = useState(Date.now());
   useEffect(function () {
     var id = setInterval(function () { setAgora(Date.now()); }, 1000);
@@ -1482,11 +1556,7 @@ function AbaMataMata() {
   var agendados = MATAMATA_UNIAO.length - feitos;
   var slots = montarChaveMM(confrontos, serie);
   var jogosSerie = MATAMATA_UNIAO.filter(function (j) { return j.serie === serie; });
-  var grupos = [
-    { titulo: "Quartas de final", nums: [1, 2, 3, 4] },
-    { titulo: "Semifinais", nums: [5, 6, 7, 8] },
-    { titulo: "Finais", nums: [9, 10, 11, 12] },
-  ].reverse();
+  var faseSel = FASES_SEL_MM.find(function (f) { return f.id === fase; }) || FASES_SEL_MM[0];
 
   return (
     <div className="px-3 pt-3">
@@ -1549,16 +1619,34 @@ function AbaMataMata() {
       ) : visao === "confrontos" ? (
         <div>
           <ChaveMM slots={slots} />
-          {grupos.map(function (g) {
-            var comJogo = g.nums.map(function (n) { return slots[n - 1]; }).filter(function (s) { return s.tie; });
-            if (comJogo.length === 0) return null;
-            return (
-              <div key={g.titulo}>
-                <h3 className="text-sm font-bold text-slate-200 mb-2">{g.titulo}</h3>
-                {comJogo.map(function (s) { return <CardConfrontoMM key={s.n} slot={s} />; })}
-              </div>
-            );
+
+          <div className="flex rounded-lg border border-slate-700 overflow-hidden mb-3">
+            {FASES_SEL_MM.map(function (f) {
+              var nos = f.nums.map(function (n) { return slots[n - 1]; });
+              var tot = nos.filter(function (s) { return s.tie; }).length;
+              var dec = nos.filter(function (s) { return s.tie && s.tie.decididos === 4; }).length;
+              var ativo = fase === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={function () { setFase(f.id); }}
+                  className={"flex-1 py-1.5 text-center transition " + (ativo ? "bg-slate-700 text-white" : "text-slate-400")}
+                >
+                  <div className="text-xs font-semibold">{f.titulo}</div>
+                  <div className="text-[9px] opacity-70">{tot === 0 ? "a definir" : (dec + "/" + tot + " decididos")}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          {faseSel.nums.map(function (n) {
+            var s = slots[n - 1];
+            return s.tie
+              ? <CardConfrontoMM key={n} slot={s} />
+              : <CardADefinirMM key={n} slot={s} serie={serie} fase={faseSel} />;
           })}
+
+          <ClassificacaoFinalMM serie={serie} />
           <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem vencer mais subs no confronto; empate nas vitórias, decide o saldo de gols somado dos 4 subs.</p>
         </div>
       ) : (
