@@ -50,6 +50,12 @@ async function extrairTabelaClassificacao(page, containerId) {
 
 // Nome amigável da fase do Campeonato Paulista a partir do texto da aba
 // (ex.: "QUARTAS DE FINAIS - BRONE" -> "Quartas de Final · Bronze").
+// Abas do mata-mata do Torneio União: "TORNEIO UNIÃO - QUARTAS OURO" (e variações
+// com typo "UNIAO") ou, em alguns casos, só "FINAL RUBI" (sem hífen, sem prefixo).
+function ehMataMataUniao(texto) {
+  return /TORNEIO UNI[ÃA]O\s*-\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
+}
+
 function nomeFase(texto) {
   const t = texto.toUpperCase();
   let base = "Fase";
@@ -134,6 +140,7 @@ async function acharAbaPorTexto(page, textoParcial) {
     jogosUniao: [], // [ [categoria,grupo,status,data,horario,local,mandante,visitante,golsMandante,golsVisitante], ... ]
     artilheiros: [], // [ [categoria,campeonato,jogador,clube,gols], ... ]
     jogosPaulista: [], // [ [categoria,fase,status,data,horario,local,mandante,visitante,golsMandante,golsVisitante], ... ]
+    matamataUniao: [], // [ [categoria,fase,serie,status,data,horario,local,mandante,visitante,golsMandante,golsVisitante], ... ]
   };
 
   // ---- 1) Classificação Geral (Acesso A2 = Paulista + União combinados) ----
@@ -210,13 +217,35 @@ async function acharAbaPorTexto(page, textoParcial) {
       });
     }
 
+    // Mata-mata do Torneio União (ida e volta): abas "TORNEIO UNIÃO - QUARTAS OURO" etc.
+    // Cada aba traz 1 jogo (ida OU volta); o front-end pareia os dois pelos clubes.
+    const abasMata = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[role="tab"]')).map((t) => ({ texto: t.textContent.trim(), id: t.getAttribute("href").slice(1) }))
+    );
+    for (const aba of abasMata) {
+      if (!ehMataMataUniao(aba.texto)) continue;
+      const m = aba.texto.match(/(OITAVAS|QUARTAS|SEMI\w*|FINAL)\w*(?:\s+DE\s+FINAIS?)?\s*-?\s*(OURO|PRATA|BRONZE|BRONE|RUBI)/i);
+      if (!m) continue;
+      const f = m[1].toUpperCase();
+      const fase = f.startsWith("OITAVAS") ? "Oitavas" : f.startsWith("QUARTAS") ? "Quartas" : f.startsWith("SEMI") ? "Semifinal" : "Final";
+      const s = m[2].toUpperCase();
+      const serie = s === "BRONE" ? "Bronze" : s.charAt(0) + s.slice(1).toLowerCase();
+      const jogosM = await extrairJogos(page, aba.id, categoria, fase);
+      jogosM.forEach((j) => {
+        dados.matamataUniao.push([
+          categoria, fase, serie, j.status, j.data, j.horario, j.local,
+          normalizarClube(j.mandante), normalizarClube(j.visitante), j.golsMandante, j.golsVisitante,
+        ]);
+      });
+    }
+
     // Jogos do Campeonato Paulista (1ª fase + mata-mata): todas as abas da
     // página /jogos que NÃO são do Torneio União (ainda na mesma página).
     const abasPaulista = await page.evaluate(() =>
       Array.from(document.querySelectorAll('[role="tab"]')).map((t) => ({ texto: t.textContent.trim(), id: t.getAttribute("href").slice(1) }))
     );
     for (const aba of abasPaulista) {
-      if (/TORNEIO UNI/i.test(aba.texto)) continue;
+      if (/TORNEIO UNI/i.test(aba.texto) || ehMataMataUniao(aba.texto)) continue;
       const fase = nomeFase(aba.texto);
       const jogosP = await extrairJogos(page, aba.id, categoria, fase);
       jogosP.forEach((j) => {
