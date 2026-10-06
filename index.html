@@ -1155,7 +1155,7 @@ function construirConfrontosMM() {
   var classif = classificacaoAcessoA2();
   var pos = {};
   var total = {};
-  classif.forEach(function (r) { pos[r.nome] = r.posicao; total[r.nome] = r.total; });
+  classif.forEach(function (r) { pos[nomeCurto(r.nome)] = r.posicao; total[nomeCurto(r.nome)] = r.total; });
   var mapa = new Map();
   MATAMATA_UNIAO.forEach(function (j) {
     var par = [j.mandante, j.visitante].sort();
@@ -1166,7 +1166,7 @@ function construirConfrontosMM() {
   return Array.from(mapa.values()).map(function (c) {
     var a = c.par[0];
     var b = c.par[1];
-    if ((pos[b] || 999) < (pos[a] || 999)) { var tmp = a; a = b; b = tmp; }
+    if ((pos[nomeCurto(b)] || 999) < (pos[nomeCurto(a)] || 999)) { var tmp = a; a = b; b = tmp; }
     var porSub = CATEGORIAS.map(function (cat) {
       var jogos = c.jogos.filter(function (j) { return j.categoria === cat; }).sort(function (x, y) { return dataHoraJogoMM(x) - dataHoraJogoMM(y); });
       var ga = 0, gb = 0, jogados = 0;
@@ -1189,7 +1189,7 @@ function construirConfrontosMM() {
     if (decididos === 4) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
     return {
       serie: c.serie, fase: c.fase, a: a, b: b,
-      posA: pos[a], posB: pos[b], totalA: total[a], totalB: total[b],
+      posA: pos[nomeCurto(a)], posB: pos[nomeCurto(b)], totalA: total[nomeCurto(a)], totalB: total[nomeCurto(b)],
       porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos,
       emp: porSub.filter(function (s) { return s.decidido && !s.vencedor; }).length,
       vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
