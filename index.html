@@ -1540,6 +1540,8 @@ function AbaMataMata() {
   var emAndamento = pendentes.filter(function (x) { return x.t <= agora && agora - x.t < JANELA; });
   var aguardandoPlacar = pendentes.filter(function (x) { return agora - x.t >= JANELA; });
   var proximo = futuros.length ? futuros[0] : null;
+  var simultaneos = proximo ? futuros.filter(function (x) { return x.t === proximo.t; }) : [];
+  var seriesSim = Array.from(new Set(simultaneos.map(function (x) { return x.j.serie; })));
   var feitos = MATAMATA_UNIAO.filter(function (j) { return j.status === "finalizado"; }).length;
   var agendados = MATAMATA_UNIAO.length - feitos;
   var slots = montarChaveMM(confrontos, serie);
@@ -1564,7 +1566,7 @@ function AbaMataMata() {
             <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">{emAndamento.length > 0 ? "Próximo jogo em" : "A bola rola em"}</div>
             <CronometroMM alvo={new Date(proximo.t)} agora={agora} />
             <div className="text-[10px] text-slate-400 mt-1.5">
-              <span className="capitalize">{rotuloDiaMM(proximo.j.data)}</span> · {proximo.j.hora} · {proximo.j.categoria} · {nomeCurto(proximo.j.mandante)} x {nomeCurto(proximo.j.visitante)}
+              <span className="capitalize">{rotuloDiaMM(proximo.j.data)}</span> · {proximo.j.hora} · {simultaneos.length} {simultaneos.length === 1 ? "jogo" : "jogos"} neste horário ({seriesSim.join(" · ")})
             </div>
           </div>
         ) : (
