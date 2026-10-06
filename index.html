@@ -1155,7 +1155,8 @@ function construirConfrontosMM() {
   var classif = classificacaoAcessoA2();
   var pos = {};
   var total = {};
-  classif.forEach(function (r) { pos[nomeCurto(r.nome)] = r.posicao; total[nomeCurto(r.nome)] = r.total; });
+  var pts = {};
+  classif.forEach(function (r) { pos[nomeCurto(r.nome)] = r.posicao; total[nomeCurto(r.nome)] = r.total; pts[nomeCurto(r.nome)] = r.pontos; });
   var mapa = new Map();
   MATAMATA_UNIAO.forEach(function (j) {
     var par = [j.mandante, j.visitante].sort();
@@ -1189,7 +1190,7 @@ function construirConfrontosMM() {
     if (decididos === 4) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
     return {
       serie: c.serie, fase: c.fase, a: a, b: b,
-      posA: pos[nomeCurto(a)], posB: pos[nomeCurto(b)], totalA: total[nomeCurto(a)], totalB: total[nomeCurto(b)],
+      posA: pos[nomeCurto(a)], posB: pos[nomeCurto(b)], totalA: total[nomeCurto(a)], totalB: total[nomeCurto(b)], ptsA: pts[nomeCurto(a)], ptsB: pts[nomeCurto(b)],
       porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos,
       emp: porSub.filter(function (s) { return s.decidido && !s.vencedor; }).length,
       vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
@@ -1199,66 +1200,21 @@ function construirConfrontosMM() {
 
 function montarChaveMM(confrontos, serie) {
   var ties = confrontos.filter(function (c) { return c.serie === serie; });
-  var base = Math.max(0, SERIES_MM.indexOf(serie)) * 8;
-  var rot = function (n) { return (base + n) + "º"; };
-  var rel = function (c) { return Math.min((c.posA || 999) - base, (c.posB || 999) - base); };
-  var rotulos = {
-    1: rot(1) + " × " + rot(8), 2: rot(4) + " × " + rot(5), 3: rot(3) + " × " + rot(6), 4: rot(2) + " × " + rot(7),
-    5: "Venc. J1 × Venc. J2", 6: "Venc. J3 × Venc. J4", 7: "Perd. J1 × Perd. J2", 8: "Perd. J3 × Perd. J4",
-    9: "Venc. J5 × Venc. J6", 10: "Venc. J7 × Venc. J8", 11: "Perd. J5 × Perd. J6", 12: "Perd. J7 × Perd. J8",
-  };
-  var disputas = {
-    9: "Disputa " + rot(1) + " e " + rot(2), 11: "Disputa " + rot(3) + " e " + rot(4),
-    10: "Disputa " + rot(5) + " e " + rot(6), 12: "Disputa " + rot(7) + " e " + rot(8),
-  };
   var slots = [];
-  for (var i = 1; i <= 12; i++) slots.push({ n: i, tie: null, rotulo: rotulos[i], disputa: disputas[i] || null });
-
-  var alvoQ = { 1: 1, 4: 2, 3: 3, 2: 4 };
-  var sobrasQ = [];
-  ties.filter(function (c) { return c.fase === "Oitavas" || c.fase === "Quartas"; }).forEach(function (c) {
-    var n = alvoQ[rel(c)];
-    if (n && !slots[n - 1].tie) slots[n - 1].tie = c; else sobrasQ.push(c);
-  });
-  sobrasQ.forEach(function (c) {
-    var s = slots.slice(0, 4).find(function (x) { return !x.tie; });
-    if (s) s.tie = c;
-  });
-
-  var wl = function (n) { var t = slots[n - 1].tie; return t && t.vencedor ? { w: t.vencedor, l: t.perdedor } : null; };
-  var atribuir = function (fase, nums, esperado) {
-    var sobras = [];
-    ties.filter(function (c) { return c.fase === fase; }).forEach(function (c) {
-      var achou = nums.find(function (n) {
-        var e = esperado[n];
-        return !slots[n - 1].tie && e && e.indexOf(c.a) >= 0 && e.indexOf(c.b) >= 0;
-      });
-      if (achou) slots[achou - 1].tie = c; else sobras.push(c);
-    });
-    sobras.forEach(function (c) {
-      var n = nums.find(function (x) { return !slots[x - 1].tie; });
-      if (n) slots[n - 1].tie = c;
-    });
+  for (var i = 1; i <= 12; i++) slots.push({ n: i, tie: null });
+  // Jogos numerados na ordem da classificação Geral (melhor colocado do confronto primeiro).
+  var porFase = function (fases) {
+    return ties
+      .filter(function (c) { return fases.indexOf(c.fase) >= 0; })
+      .sort(function (x, y) { return Math.min(x.posA || 999, x.posB || 999) - Math.min(y.posA || 999, y.posB || 999); });
   };
-  var w1 = wl(1), w2 = wl(2), w3 = wl(3), w4 = wl(4);
-  var esp = {};
-  if (w1 && w2) { esp[5] = [w1.w, w2.w]; esp[7] = [w1.l, w2.l]; }
-  if (w3 && w4) { esp[6] = [w3.w, w4.w]; esp[8] = [w3.l, w4.l]; }
-  atribuir("Semifinal", [5, 6, 7, 8], esp);
-  var s5 = wl(5), s6 = wl(6), s7 = wl(7), s8 = wl(8);
-  var esp2 = {};
-  if (s5 && s6) { esp2[9] = [s5.w, s6.w]; esp2[11] = [s5.l, s6.l]; }
-  if (s7 && s8) { esp2[10] = [s7.w, s8.w]; esp2[12] = [s7.l, s8.l]; }
-  atribuir("Final", [9, 10, 11, 12], esp2);
+  porFase(["Oitavas", "Quartas"]).slice(0, 4).forEach(function (c, k) { slots[k].tie = c; });
+  porFase(["Semifinal"]).slice(0, 4).forEach(function (c, k) { slots[4 + k].tie = c; });
+  porFase(["Final"]).slice(0, 4).forEach(function (c, k) { slots[8 + k].tie = c; });
   return slots;
 }
 
-function CronometroMM({ alvo }) {
-  const [agora, setAgora] = useState(Date.now());
-  useEffect(function () {
-    var id = setInterval(function () { setAgora(Date.now()); }, 1000);
-    return function () { clearInterval(id); };
-  }, []);
+function CronometroMM({ alvo, agora }) {
   var resto = Math.max(0, alvo.getTime() - agora);
   var d = Math.floor(resto / 86400000); resto -= d * 86400000;
   var h = Math.floor(resto / 3600000); resto -= h * 3600000;
@@ -1279,11 +1235,12 @@ function CronometroMM({ alvo }) {
   );
 }
 
-function LinhaNoChaveMM({ nome, vit, destaque }) {
+function LinhaNoChaveMM({ nome, vit, saldo, destaque }) {
   return (
     <div className={"flex items-center gap-1.5 " + (destaque ? "text-white" : "text-slate-400")}>
       <Escudo nome={nome} size="w-4 h-4" />
       <span className="text-[10px] font-semibold truncate flex-1">{nomeCurto(nome)}</span>
+      <span className="text-[9px] tabular-nums text-slate-500">{saldo > 0 ? "+" + saldo : saldo}</span>
       <span className={"text-[11px] font-extrabold tabular-nums " + (destaque ? "text-emerald-400" : "")}>{vit}</span>
     </div>
   );
@@ -1294,24 +1251,24 @@ function NoChaveMM({ slot }) {
   var cab = (
     <div className="flex items-center justify-between mb-1">
       <span className="text-[9px] font-black text-emerald-400">J{slot.n}</span>
-      {slot.disputa ? <span className="text-[8px] uppercase tracking-wide text-slate-500 font-bold">{slot.disputa.replace("Disputa ", "")}</span> : null}
     </div>
   );
   if (!c) {
     return (
       <div className="w-[140px] rounded-lg border border-dashed border-slate-600 bg-slate-800/30 px-2 py-1.5">
         {cab}
-        <div className="text-[10px] font-semibold text-slate-500 leading-tight py-1">{slot.rotulo}</div>
+        <div className="text-[10px] font-semibold text-slate-500 leading-tight py-1">A definir</div>
       </div>
     );
   }
-  var lider = c.vitA === c.vitB ? null : (c.vitA > c.vitB ? "a" : "b");
+  var sa = c.golsA - c.golsB;
+  var lider = c.vitA !== c.vitB ? (c.vitA > c.vitB ? "a" : "b") : (sa !== 0 ? (sa > 0 ? "a" : "b") : null);
   return (
     <div className="w-[140px] rounded-lg border border-slate-600 bg-slate-800/80 px-2 py-1.5 shadow">
       {cab}
       <div className="space-y-1">
-        <LinhaNoChaveMM nome={c.a} vit={c.vitA} destaque={lider === "a"} />
-        <LinhaNoChaveMM nome={c.b} vit={c.vitB} destaque={lider === "b"} />
+        <LinhaNoChaveMM nome={c.a} vit={c.vitA} saldo={sa} destaque={lider === "a"} />
+        <LinhaNoChaveMM nome={c.b} vit={c.vitB} saldo={-sa} destaque={lider === "b"} />
       </div>
     </div>
   );
@@ -1321,11 +1278,11 @@ function ChaveMM({ slots }) {
   var ordem = {
     "Quartas de final": [1, 2, 3, 4],
     "Semifinais": [5, 6, 7, 8],
-    "Finais": [9, 11, 10, 12],
+    "Finais": [9, 10, 11, 12],
   };
   return (
     <div className="mb-4">
-      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Chaveamento · número = subs vencidos</div>
+      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Chaveamento · subs vencidos e saldo de gols</div>
       <div className="overflow-x-auto -mx-3 px-3 pb-1">
         <div className="flex items-stretch gap-2 min-w-max">
           {Object.keys(ordem).map(function (titulo, ci) {
@@ -1412,12 +1369,16 @@ function CardConfrontoMM({ slot }) {
   var st = SERIE_MM_STYLE[c.serie] || SERIE_MM_STYLE.Ouro;
   var somaTotal = (c.totalA || 0) + (c.totalB || 0);
   var pctA = somaTotal ? Math.round(((c.totalA || 0) / somaTotal) * 100) : 50;
+  var sal = c.golsA - c.golsB;
+  var fs = function (n) { return n > 0 ? "+" + n : String(n); };
+  var corSal = function (n) { return n > 0 ? "text-emerald-400" : (n < 0 ? "text-rose-400" : "text-slate-400"); };
+  var fp = function (n) { return typeof n === "number" ? n : "—"; };
   var fmt = function (n) { return typeof n === "number" ? n.toLocaleString("pt-BR") : "—"; };
   return (
     <div className={"rounded-2xl border bg-gradient-to-b mb-3 overflow-hidden " + st.ring + " " + st.grad}>
       <div className="px-3 pt-3 pb-2.5">
         <div className="flex items-center justify-between text-[10px] mb-2.5">
-          <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.serie}{slot.disputa ? " · " + slot.disputa : ""}</span>
+          <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.fase} · {c.serie}</span>
           <span className="text-slate-400">{c.decididos}/4 subs decididos</span>
         </div>
         <div className="flex items-center gap-2">
@@ -1429,6 +1390,11 @@ function CardConfrontoMM({ slot }) {
               <span className="text-3xl font-black text-white tabular-nums">{c.vitB}</span>
             </div>
             <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.emp > 0 ? (" · " + c.emp + " emp.") : ""}</div>
+            <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-extrabold tabular-nums">
+              <span className={corSal(sal)}>{fs(sal)}</span>
+              <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold">saldo</span>
+              <span className={corSal(-sal)}>{fs(-sal)}</span>
+            </div>
           </div>
           <LadoClubeMM nome={c.b} pos={c.posB} cor="bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-400/30" />
         </div>
@@ -1438,8 +1404,8 @@ function CardConfrontoMM({ slot }) {
             <div className="bg-fuchsia-400" style={{ width: (100 - pctA) + "%" }} />
           </div>
           <div className="flex justify-between text-[9px] text-slate-400 mt-1">
-            <span>{fmt(c.totalA)} pts no Geral</span>
-            <span>{fmt(c.totalB)} pts</span>
+            <span>{fmt(c.totalA)} total · {fp(c.ptsA)} pts</span>
+            <span>{fmt(c.totalB)} total · {fp(c.ptsB)} pts</span>
           </div>
         </div>
       </div>
@@ -1495,15 +1461,23 @@ function AgendaMM({ jogos }) {
 function AbaMataMata() {
   const [serie, setSerie] = useState("Ouro");
   const [visao, setVisao] = useState("confrontos");
-  const confrontos = useMemo(function () { return construirConfrontosMM(); }, []);
-  const proximo = useMemo(function () {
-    var fut = MATAMATA_UNIAO
-      .filter(function (j) { return j.status === "agendado"; })
-      .map(dataHoraJogoMM)
-      .filter(function (d) { return !isNaN(d.getTime()); })
-      .sort(function (a, b) { return a - b; });
-    return fut.length ? fut[0] : null;
+  const [agora, setAgora] = useState(Date.now());
+  useEffect(function () {
+    var id = setInterval(function () { setAgora(Date.now()); }, 1000);
+    return function () { clearInterval(id); };
   }, []);
+  const confrontos = useMemo(function () { return construirConfrontosMM(); }, []);
+  // Jogo "agendado" que já passou da hora é tratado como em andamento por até 3h
+  // (o placar real só entra na próxima atualização automática da FPFS).
+  var JANELA = 3 * 3600 * 1000;
+  var pendentes = MATAMATA_UNIAO
+    .filter(function (j) { return j.status === "agendado"; })
+    .map(function (j) { return { j: j, t: dataHoraJogoMM(j).getTime() }; })
+    .filter(function (x) { return !isNaN(x.t); });
+  var futuros = pendentes.filter(function (x) { return x.t > agora; }).sort(function (a, b) { return a.t - b.t; });
+  var emAndamento = pendentes.filter(function (x) { return x.t <= agora && agora - x.t < JANELA; });
+  var aguardandoPlacar = pendentes.filter(function (x) { return agora - x.t >= JANELA; });
+  var proximo = futuros.length ? futuros[0] : null;
   var feitos = MATAMATA_UNIAO.filter(function (j) { return j.status === "finalizado"; }).length;
   var agendados = MATAMATA_UNIAO.length - feitos;
   var slots = montarChaveMM(confrontos, serie);
@@ -1511,7 +1485,7 @@ function AbaMataMata() {
   var grupos = [
     { titulo: "Quartas de final", nums: [1, 2, 3, 4] },
     { titulo: "Semifinais", nums: [5, 6, 7, 8] },
-    { titulo: "Finais", nums: [9, 11, 10, 12] },
+    { titulo: "Finais", nums: [9, 10, 11, 12] },
   ].reverse();
 
   return (
@@ -1520,15 +1494,27 @@ function AbaMataMata() {
         <div className="absolute -right-3 -top-3 text-7xl opacity-10 select-none">⚔️</div>
         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Torneio União · Mata-mata</div>
         <h2 className="text-lg font-black text-white leading-tight mt-0.5">Ida e volta nos 4 subs</h2>
-        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas definidas pelo Geral: 1º×8º, 4º×5º, 3º×6º e 2º×7º.</p>
+        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas pelo Geral: 1º×8º, 2º×7º, 3º×6º e 4º×5º. Passa quem vence mais subs; se empatar nas vitórias, decide o saldo de gols.</p>
+        {emAndamento.length > 0 ? (
+          <div className="rounded-lg bg-rose-500/15 border border-rose-400/30 px-2.5 py-2 mb-2.5">
+            <div className="text-xs font-bold text-rose-300">🔴 Bola rolando: {emAndamento.length} {emAndamento.length === 1 ? "jogo em andamento" : "jogos em andamento"}</div>
+            <div className="text-[10px] text-slate-300 mt-0.5">Os placares entram na próxima atualização automática (a cada ~15 min nos fins de semana).</div>
+          </div>
+        ) : null}
         {proximo ? (
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">A bola rola em</div>
-            <CronometroMM alvo={proximo} />
-            <div className="text-[10px] text-slate-400 mt-1.5 capitalize">{rotuloDiaMM(proximo.toISOString().slice(0, 10))}</div>
+            <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">{emAndamento.length > 0 ? "Próximo jogo em" : "A bola rola em"}</div>
+            <CronometroMM alvo={new Date(proximo.t)} agora={agora} />
+            <div className="text-[10px] text-slate-400 mt-1.5">
+              <span className="capitalize">{rotuloDiaMM(proximo.j.data)}</span> · {proximo.j.hora} · {proximo.j.categoria} · {nomeCurto(proximo.j.mandante)} x {nomeCurto(proximo.j.visitante)}
+            </div>
           </div>
         ) : (
-          <div className="text-xs font-semibold text-slate-300">{MATAMATA_UNIAO.length ? "Nenhum jogo agendado no momento." : "Os jogos aparecem aqui assim que a FPFS publicar."}</div>
+          <div className="text-xs font-semibold text-slate-300">
+            {MATAMATA_UNIAO.length === 0
+              ? "Os jogos aparecem aqui assim que a FPFS publicar."
+              : (emAndamento.length > 0 || aguardandoPlacar.length > 0 ? "Sem novos jogos marcados por enquanto. Aguardando os últimos placares." : "Nenhum jogo agendado no momento. Novas datas aparecem aqui quando a FPFS publicar.")}
+          </div>
         )}
         <div className="flex gap-1.5 mt-3 text-[10px]">
           <span className="px-2 py-1 rounded-full bg-slate-950/40 border border-white/10 text-slate-300">{MATAMATA_UNIAO.length} jogos</span>
@@ -1573,7 +1559,7 @@ function AbaMataMata() {
               </div>
             );
           })}
-          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Quem avança na chave: mais subs vencidos no confronto (saldo de gols desempata). Critério provisório até a FPFS confirmar.</p>
+          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem vencer mais subs no confronto; empate nas vitórias, decide o saldo de gols somado dos 4 subs.</p>
         </div>
       ) : (
         <AgendaMM jogos={jogosSerie} />
