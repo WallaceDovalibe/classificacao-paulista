@@ -19,7 +19,7 @@
 <div id="root"></div>
 
 <script type="text/babel" data-presets="react">
-const { useState, useMemo } = React;
+const { useState, useMemo, useEffect } = React;
 
 /* ============================================================
    1) DADOS REAIS DO TORNEIO UNIÃO DE CLUBES — Abas 1 e 2
@@ -636,6 +636,7 @@ function construirArtilharia() {
 
 let JOGOS_UNIAO = [];
 let JOGOS_PAULISTA = []; // jogos do Campeonato Paulista (grupo = fase)
+let MATAMATA_UNIAO = []; // mata-mata do Torneio União (ida e volta)
 let ARTILHEIROS = [];
 
 /* ---- Cards da Aba "Jogos e Resultados" ---- */
@@ -1123,6 +1124,464 @@ function AbaJogos() {
   );
 }
 
+/* ============================================================
+   ABA MATA-MATA — Torneio União (jogos de ida e volta)
+   Regra: todos jogam até o fim; cada jogo define uma posição da série.
+   Quartas: J1 1ºx8º, J2 4ºx5º, J3 3ºx6º, J4 2ºx7º
+   Semis:   J5 V1xV2, J6 V3xV4, J7 P1xP2, J8 P3xP4
+   Finais:  J9 V5xV6 (1º/2º), J11 P5xP6 (3º/4º), J10 V7xV8 (5º/6º), J12 P7xP8 (7º/8º)
+   ============================================================ */
+
+const SERIES_MM = ["Ouro", "Prata", "Bronze", "Rubi"];
+const SERIE_MM_STYLE = {
+  Ouro:   { icon: "🥇", ring: "border-amber-400/40",  grad: "from-amber-500/20 to-slate-800/60",  text: "text-amber-300",  chip: "bg-amber-400 text-slate-900 border-amber-300" },
+  Prata:  { icon: "🥈", ring: "border-slate-300/40",  grad: "from-slate-300/20 to-slate-800/60",  text: "text-slate-200",  chip: "bg-slate-300 text-slate-900 border-slate-200" },
+  Bronze: { icon: "🥉", ring: "border-orange-400/40", grad: "from-orange-500/20 to-slate-800/60", text: "text-orange-300", chip: "bg-orange-400 text-slate-900 border-orange-300" },
+  Rubi:   { icon: "💎", ring: "border-rose-400/40",   grad: "from-rose-500/20 to-slate-800/60",   text: "text-rose-300",   chip: "bg-rose-400 text-slate-900 border-rose-300" },
+};
+
+function dataHoraJogoMM(j) {
+  var h = /^\d{1,2}:\d{2}$/.test(j.hora || "") ? j.hora : "00:00";
+  if (h.length === 4) h = "0" + h;
+  return new Date(j.data + "T" + h + ":00-03:00");
+}
+
+function rotuloDiaMM(iso) {
+  var d = new Date(iso + "T12:00:00-03:00");
+  return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit" });
+}
+
+function construirConfrontosMM() {
+  var classif = classificacaoAcessoA2();
+  var pos = {};
+  var total = {};
+  classif.forEach(function (r) { pos[r.nome] = r.posicao; total[r.nome] = r.total; });
+  var mapa = new Map();
+  MATAMATA_UNIAO.forEach(function (j) {
+    var par = [j.mandante, j.visitante].sort();
+    var k = j.serie + "|" + j.fase + "|" + par.join("||");
+    if (!mapa.has(k)) mapa.set(k, { serie: j.serie, fase: j.fase, par: par, jogos: [] });
+    mapa.get(k).jogos.push(j);
+  });
+  return Array.from(mapa.values()).map(function (c) {
+    var a = c.par[0];
+    var b = c.par[1];
+    if ((pos[b] || 999) < (pos[a] || 999)) { var tmp = a; a = b; b = tmp; }
+    var porSub = CATEGORIAS.map(function (cat) {
+      var jogos = c.jogos.filter(function (j) { return j.categoria === cat; }).sort(function (x, y) { return dataHoraJogoMM(x) - dataHoraJogoMM(y); });
+      var ga = 0, gb = 0, jogados = 0;
+      jogos.forEach(function (j) {
+        if (j.status !== "finalizado") return;
+        jogados++;
+        if (j.mandante === a) { ga += j.golsMandante; gb += j.golsVisitante; }
+        else { gb += j.golsMandante; ga += j.golsVisitante; }
+      });
+      var decidido = jogados >= 2;
+      var vencedor = decidido ? (ga > gb ? a : (gb > ga ? b : null)) : null;
+      return { categoria: cat, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor };
+    });
+    var vitA = porSub.filter(function (s) { return s.vencedor === a; }).length;
+    var vitB = porSub.filter(function (s) { return s.vencedor === b; }).length;
+    var golsA = porSub.reduce(function (t, s) { return t + s.ga; }, 0);
+    var golsB = porSub.reduce(function (t, s) { return t + s.gb; }, 0);
+    var decididos = porSub.filter(function (s) { return s.decidido; }).length;
+    var lider = null;
+    if (decididos === 4) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
+    return {
+      serie: c.serie, fase: c.fase, a: a, b: b,
+      posA: pos[a], posB: pos[b], totalA: total[a], totalB: total[b],
+      porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos,
+      emp: porSub.filter(function (s) { return s.decidido && !s.vencedor; }).length,
+      vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
+    };
+  }).sort(function (x, y) { return (x.posA || 999) - (y.posA || 999); });
+}
+
+function montarChaveMM(confrontos, serie) {
+  var ties = confrontos.filter(function (c) { return c.serie === serie; });
+  var base = Math.max(0, SERIES_MM.indexOf(serie)) * 8;
+  var rot = function (n) { return (base + n) + "º"; };
+  var rel = function (c) { return Math.min((c.posA || 999) - base, (c.posB || 999) - base); };
+  var rotulos = {
+    1: rot(1) + " × " + rot(8), 2: rot(4) + " × " + rot(5), 3: rot(3) + " × " + rot(6), 4: rot(2) + " × " + rot(7),
+    5: "Venc. J1 × Venc. J2", 6: "Venc. J3 × Venc. J4", 7: "Perd. J1 × Perd. J2", 8: "Perd. J3 × Perd. J4",
+    9: "Venc. J5 × Venc. J6", 10: "Venc. J7 × Venc. J8", 11: "Perd. J5 × Perd. J6", 12: "Perd. J7 × Perd. J8",
+  };
+  var disputas = {
+    9: "Disputa " + rot(1) + " e " + rot(2), 11: "Disputa " + rot(3) + " e " + rot(4),
+    10: "Disputa " + rot(5) + " e " + rot(6), 12: "Disputa " + rot(7) + " e " + rot(8),
+  };
+  var slots = [];
+  for (var i = 1; i <= 12; i++) slots.push({ n: i, tie: null, rotulo: rotulos[i], disputa: disputas[i] || null });
+
+  var alvoQ = { 1: 1, 4: 2, 3: 3, 2: 4 };
+  var sobrasQ = [];
+  ties.filter(function (c) { return c.fase === "Oitavas" || c.fase === "Quartas"; }).forEach(function (c) {
+    var n = alvoQ[rel(c)];
+    if (n && !slots[n - 1].tie) slots[n - 1].tie = c; else sobrasQ.push(c);
+  });
+  sobrasQ.forEach(function (c) {
+    var s = slots.slice(0, 4).find(function (x) { return !x.tie; });
+    if (s) s.tie = c;
+  });
+
+  var wl = function (n) { var t = slots[n - 1].tie; return t && t.vencedor ? { w: t.vencedor, l: t.perdedor } : null; };
+  var atribuir = function (fase, nums, esperado) {
+    var sobras = [];
+    ties.filter(function (c) { return c.fase === fase; }).forEach(function (c) {
+      var achou = nums.find(function (n) {
+        var e = esperado[n];
+        return !slots[n - 1].tie && e && e.indexOf(c.a) >= 0 && e.indexOf(c.b) >= 0;
+      });
+      if (achou) slots[achou - 1].tie = c; else sobras.push(c);
+    });
+    sobras.forEach(function (c) {
+      var n = nums.find(function (x) { return !slots[x - 1].tie; });
+      if (n) slots[n - 1].tie = c;
+    });
+  };
+  var w1 = wl(1), w2 = wl(2), w3 = wl(3), w4 = wl(4);
+  var esp = {};
+  if (w1 && w2) { esp[5] = [w1.w, w2.w]; esp[7] = [w1.l, w2.l]; }
+  if (w3 && w4) { esp[6] = [w3.w, w4.w]; esp[8] = [w3.l, w4.l]; }
+  atribuir("Semifinal", [5, 6, 7, 8], esp);
+  var s5 = wl(5), s6 = wl(6), s7 = wl(7), s8 = wl(8);
+  var esp2 = {};
+  if (s5 && s6) { esp2[9] = [s5.w, s6.w]; esp2[11] = [s5.l, s6.l]; }
+  if (s7 && s8) { esp2[10] = [s7.w, s8.w]; esp2[12] = [s7.l, s8.l]; }
+  atribuir("Final", [9, 10, 11, 12], esp2);
+  return slots;
+}
+
+function CronometroMM({ alvo }) {
+  const [agora, setAgora] = useState(Date.now());
+  useEffect(function () {
+    var id = setInterval(function () { setAgora(Date.now()); }, 1000);
+    return function () { clearInterval(id); };
+  }, []);
+  var resto = Math.max(0, alvo.getTime() - agora);
+  var d = Math.floor(resto / 86400000); resto -= d * 86400000;
+  var h = Math.floor(resto / 3600000); resto -= h * 3600000;
+  var m = Math.floor(resto / 60000); resto -= m * 60000;
+  var s = Math.floor(resto / 1000);
+  var blocos = [["dias", d], ["horas", h], ["min", m], ["seg", s]];
+  return (
+    <div className="flex gap-1.5">
+      {blocos.map(function (b) {
+        return (
+          <div key={b[0]} className="flex-1 rounded-lg bg-slate-950/50 border border-white/10 py-1.5 text-center">
+            <div className="text-xl font-black text-white tabular-nums leading-none">{String(b[1]).padStart(2, "0")}</div>
+            <div className="text-[9px] uppercase tracking-wider text-slate-400 mt-1">{b[0]}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LinhaNoChaveMM({ nome, vit, destaque }) {
+  return (
+    <div className={"flex items-center gap-1.5 " + (destaque ? "text-white" : "text-slate-400")}>
+      <Escudo nome={nome} size="w-4 h-4" />
+      <span className="text-[10px] font-semibold truncate flex-1">{nomeCurto(nome)}</span>
+      <span className={"text-[11px] font-extrabold tabular-nums " + (destaque ? "text-emerald-400" : "")}>{vit}</span>
+    </div>
+  );
+}
+
+function NoChaveMM({ slot }) {
+  var c = slot.tie;
+  var cab = (
+    <div className="flex items-center justify-between mb-1">
+      <span className="text-[9px] font-black text-emerald-400">J{slot.n}</span>
+      {slot.disputa ? <span className="text-[8px] uppercase tracking-wide text-slate-500 font-bold">{slot.disputa.replace("Disputa ", "")}</span> : null}
+    </div>
+  );
+  if (!c) {
+    return (
+      <div className="w-[140px] rounded-lg border border-dashed border-slate-600 bg-slate-800/30 px-2 py-1.5">
+        {cab}
+        <div className="text-[10px] font-semibold text-slate-500 leading-tight py-1">{slot.rotulo}</div>
+      </div>
+    );
+  }
+  var lider = c.vitA === c.vitB ? null : (c.vitA > c.vitB ? "a" : "b");
+  return (
+    <div className="w-[140px] rounded-lg border border-slate-600 bg-slate-800/80 px-2 py-1.5 shadow">
+      {cab}
+      <div className="space-y-1">
+        <LinhaNoChaveMM nome={c.a} vit={c.vitA} destaque={lider === "a"} />
+        <LinhaNoChaveMM nome={c.b} vit={c.vitB} destaque={lider === "b"} />
+      </div>
+    </div>
+  );
+}
+
+function ChaveMM({ slots }) {
+  var ordem = {
+    "Quartas de final": [1, 2, 3, 4],
+    "Semifinais": [5, 6, 7, 8],
+    "Finais": [9, 11, 10, 12],
+  };
+  return (
+    <div className="mb-4">
+      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Chaveamento · número = subs vencidos</div>
+      <div className="overflow-x-auto -mx-3 px-3 pb-1">
+        <div className="flex items-stretch gap-2 min-w-max">
+          {Object.keys(ordem).map(function (titulo, ci) {
+            return (
+              <div key={titulo} className="flex flex-col">
+                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1.5">{titulo}</div>
+                <div className="flex flex-col gap-2">
+                  {ordem[titulo].map(function (n) {
+                    return (
+                      <div key={n} className="flex items-center">
+                        <NoChaveMM slot={slots[n - 1]} />
+                        {ci < 2 ? <div className="w-3 h-px bg-slate-600" /> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LadoClubeMM({ nome, pos, cor }) {
+  return (
+    <div className="flex-1 min-w-0 flex flex-col items-center text-center">
+      <Escudo nome={nome} size="w-12 h-12" />
+      <div className="mt-1 text-[11px] font-bold leading-tight text-white w-full truncate">{nomeCurto(nome)}</div>
+      {pos ? <span className={"mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border " + cor}>{pos}º no Geral</span> : null}
+    </div>
+  );
+}
+
+function PernaMM({ j, rotulo }) {
+  if (!j) {
+    return (
+      <div className="flex-1 min-w-0 rounded-lg border border-dashed border-slate-700 px-1.5 py-1 text-center">
+        <div className="text-[8px] uppercase tracking-wider text-slate-600 font-bold">{rotulo}</div>
+        <div className="text-[10px] text-slate-600 py-0.5">a definir</div>
+      </div>
+    );
+  }
+  var feito = j.status === "finalizado";
+  return (
+    <div className="flex-1 min-w-0 rounded-lg bg-slate-800/70 border border-slate-700/70 px-1.5 py-1">
+      <div className="flex justify-between gap-1 text-[8px] uppercase tracking-wider font-bold">
+        <span className="text-slate-400">{rotulo}</span>
+        <span className={feito ? "text-slate-500" : "text-emerald-400"}>{formatarDataCurta(j.data)}{!feito && j.hora ? " · " + j.hora : ""}</span>
+      </div>
+      <div className="flex items-center justify-center gap-1 mt-0.5">
+        <Escudo nome={j.mandante} size="w-4 h-4" />
+        <span className="text-[13px] font-extrabold text-white tabular-nums">{feito ? j.golsMandante : "–"}</span>
+        <span className="text-slate-600 text-[9px]">x</span>
+        <span className="text-[13px] font-extrabold text-white tabular-nums">{feito ? j.golsVisitante : "–"}</span>
+        <Escudo nome={j.visitante} size="w-4 h-4" />
+      </div>
+    </div>
+  );
+}
+
+function LinhaSubMM({ s }) {
+  return (
+    <div className="flex items-stretch gap-1.5">
+      <div className="w-8 shrink-0 flex flex-col items-center justify-center rounded-lg bg-slate-800/60 border border-slate-700/50">
+        <span className="text-[7px] uppercase tracking-wider text-slate-500 font-bold leading-none">sub</span>
+        <span className="text-sm font-black text-slate-200 leading-tight">{s.categoria.replace("Sub-", "")}</span>
+      </div>
+      <PernaMM j={s.ida} rotulo="Ida" />
+      <PernaMM j={s.volta} rotulo="Volta" />
+      <div className={"w-12 shrink-0 rounded-lg text-center py-1 border " + (s.decidido ? "bg-emerald-500/15 border-emerald-500/30" : "bg-slate-800/50 border-slate-700/50")}>
+        {s.vencedor
+          ? <Escudo nome={s.vencedor} size="w-3.5 h-3.5 block mx-auto" />
+          : <div className="text-[8px] uppercase tracking-wider text-slate-500 font-bold leading-snug">{s.decidido ? "empate" : "agreg."}</div>}
+        <div className="text-xs font-extrabold text-white tabular-nums mt-0.5">{s.jogados > 0 ? (s.ga + "–" + s.gb) : "–"}</div>
+      </div>
+    </div>
+  );
+}
+
+function CardConfrontoMM({ slot }) {
+  var c = slot.tie;
+  var st = SERIE_MM_STYLE[c.serie] || SERIE_MM_STYLE.Ouro;
+  var somaTotal = (c.totalA || 0) + (c.totalB || 0);
+  var pctA = somaTotal ? Math.round(((c.totalA || 0) / somaTotal) * 100) : 50;
+  var fmt = function (n) { return typeof n === "number" ? n.toLocaleString("pt-BR") : "—"; };
+  return (
+    <div className={"rounded-2xl border bg-gradient-to-b mb-3 overflow-hidden " + st.ring + " " + st.grad}>
+      <div className="px-3 pt-3 pb-2.5">
+        <div className="flex items-center justify-between text-[10px] mb-2.5">
+          <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.serie}{slot.disputa ? " · " + slot.disputa : ""}</span>
+          <span className="text-slate-400">{c.decididos}/4 subs decididos</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <LadoClubeMM nome={c.a} pos={c.posA} cor="bg-sky-500/15 text-sky-300 border-sky-400/30" />
+          <div className="text-center shrink-0 px-1">
+            <div className="flex items-baseline justify-center gap-1.5">
+              <span className="text-3xl font-black text-white tabular-nums">{c.vitA}</span>
+              <span className="text-slate-500 text-sm">×</span>
+              <span className="text-3xl font-black text-white tabular-nums">{c.vitB}</span>
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.emp > 0 ? (" · " + c.emp + " emp.") : ""}</div>
+          </div>
+          <LadoClubeMM nome={c.b} pos={c.posB} cor="bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-400/30" />
+        </div>
+        <div className="mt-3">
+          <div className="h-1.5 rounded-full overflow-hidden flex bg-slate-700">
+            <div className="bg-sky-400" style={{ width: pctA + "%" }} />
+            <div className="bg-fuchsia-400" style={{ width: (100 - pctA) + "%" }} />
+          </div>
+          <div className="flex justify-between text-[9px] text-slate-400 mt-1">
+            <span>{fmt(c.totalA)} pts no Geral</span>
+            <span>{fmt(c.totalB)} pts</span>
+          </div>
+        </div>
+      </div>
+      <div className="bg-slate-950/40 border-t border-white/5 px-2.5 py-2.5 space-y-1.5">
+        {c.porSub.map(function (s) { return <LinhaSubMM key={s.categoria} s={s} />; })}
+        {(c.golsA + c.golsB) > 0 ? (
+          <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400">
+            <span>Gols nos 4 subs</span>
+            <span className="font-bold text-slate-200 tabular-nums">{c.golsA} – {c.golsB} <span className="text-slate-500 font-medium">(saldo {c.golsA - c.golsB > 0 ? "+" : ""}{c.golsA - c.golsB})</span></span>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function AgendaMM({ jogos }) {
+  var rotular = function (j) { return Object.assign({}, j, { categoria: j.categoria + " · " + j.fase + " " + j.serie }); };
+  var proximos = jogos.filter(function (j) { return j.status === "agendado"; }).sort(function (a, b) { return dataHoraJogoMM(a) - dataHoraJogoMM(b); });
+  var feitos = jogos.filter(function (j) { return j.status === "finalizado"; }).sort(function (a, b) { return dataHoraJogoMM(b) - dataHoraJogoMM(a); });
+  var agrupar = function (lista) {
+    var dias = [];
+    lista.forEach(function (j) {
+      var ult = dias[dias.length - 1];
+      if (ult && ult.data === j.data) ult.jogos.push(j); else dias.push({ data: j.data, jogos: [j] });
+    });
+    return dias;
+  };
+  return (
+    <div>
+      {proximos.length > 0 ? <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Próximos jogos</div> : null}
+      {agrupar(proximos).map(function (dia) {
+        return (
+          <div key={"p" + dia.data} className="mb-3">
+            <div className="text-xs font-bold text-slate-200 capitalize mb-1.5">{rotuloDiaMM(dia.data)}</div>
+            {dia.jogos.map(function (j) { return <CardProximo key={j.id} jogo={rotular(j)} />; })}
+          </div>
+        );
+      })}
+      {feitos.length > 0 ? <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 mt-2">Resultados</div> : null}
+      {agrupar(feitos).map(function (dia) {
+        return (
+          <div key={"f" + dia.data} className="mb-3">
+            <div className="text-xs font-bold text-slate-200 capitalize mb-1.5">{rotuloDiaMM(dia.data)}</div>
+            {dia.jogos.map(function (j) { return <CardResultado key={j.id} jogo={rotular(j)} />; })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AbaMataMata() {
+  const [serie, setSerie] = useState("Ouro");
+  const [visao, setVisao] = useState("confrontos");
+  const confrontos = useMemo(function () { return construirConfrontosMM(); }, []);
+  const proximo = useMemo(function () {
+    var fut = MATAMATA_UNIAO
+      .filter(function (j) { return j.status === "agendado"; })
+      .map(dataHoraJogoMM)
+      .filter(function (d) { return !isNaN(d.getTime()); })
+      .sort(function (a, b) { return a - b; });
+    return fut.length ? fut[0] : null;
+  }, []);
+  var feitos = MATAMATA_UNIAO.filter(function (j) { return j.status === "finalizado"; }).length;
+  var agendados = MATAMATA_UNIAO.length - feitos;
+  var slots = montarChaveMM(confrontos, serie);
+  var jogosSerie = MATAMATA_UNIAO.filter(function (j) { return j.serie === serie; });
+  var grupos = [
+    { titulo: "Quartas de final", nums: [1, 2, 3, 4] },
+    { titulo: "Semifinais", nums: [5, 6, 7, 8] },
+    { titulo: "Finais", nums: [9, 11, 10, 12] },
+  ].reverse();
+
+  return (
+    <div className="px-3 pt-3">
+      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-600/40 via-slate-800 to-emerald-600/30 p-3.5 mb-3 relative overflow-hidden">
+        <div className="absolute -right-3 -top-3 text-7xl opacity-10 select-none">⚔️</div>
+        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Torneio União · Mata-mata</div>
+        <h2 className="text-lg font-black text-white leading-tight mt-0.5">Ida e volta nos 4 subs</h2>
+        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas definidas pelo Geral: 1º×8º, 4º×5º, 3º×6º e 2º×7º.</p>
+        {proximo ? (
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">A bola rola em</div>
+            <CronometroMM alvo={proximo} />
+            <div className="text-[10px] text-slate-400 mt-1.5 capitalize">{rotuloDiaMM(proximo.toISOString().slice(0, 10))}</div>
+          </div>
+        ) : (
+          <div className="text-xs font-semibold text-slate-300">{MATAMATA_UNIAO.length ? "Nenhum jogo agendado no momento." : "Os jogos aparecem aqui assim que a FPFS publicar."}</div>
+        )}
+        <div className="flex gap-1.5 mt-3 text-[10px]">
+          <span className="px-2 py-1 rounded-full bg-slate-950/40 border border-white/10 text-slate-300">{MATAMATA_UNIAO.length} jogos</span>
+          <span className="px-2 py-1 rounded-full bg-slate-950/40 border border-white/10 text-slate-300">{feitos} realizados</span>
+          <span className="px-2 py-1 rounded-full bg-slate-950/40 border border-white/10 text-emerald-300">{agendados} agendados</span>
+        </div>
+      </div>
+
+      <div className="flex gap-1.5 overflow-x-auto pb-2">
+        {SERIES_MM.map(function (s) {
+          var st = SERIE_MM_STYLE[s];
+          var ativo = serie === s;
+          return (
+            <button
+              key={s}
+              onClick={function () { setSerie(s); }}
+              className={"shrink-0 text-xs font-bold px-3.5 py-1.5 rounded-full border transition " + (ativo ? st.chip : "bg-transparent text-slate-300 border-slate-600")}
+            >
+              {st.icon} {s}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex rounded-lg border border-slate-700 overflow-hidden mb-3">
+        <button onClick={function () { setVisao("confrontos"); }} className={"flex-1 text-xs font-semibold py-1.5 transition " + (visao === "confrontos" ? "bg-slate-700 text-white" : "text-slate-400")}>Confrontos</button>
+        <button onClick={function () { setVisao("agenda"); }} className={"flex-1 text-xs font-semibold py-1.5 transition " + (visao === "agenda" ? "bg-slate-700 text-white" : "text-slate-400")}>Agenda</button>
+      </div>
+
+      {MATAMATA_UNIAO.length === 0 ? (
+        <p className="text-center text-xs text-slate-500 py-8">Ainda não há jogos de mata-mata nos dados. Eles chegam na próxima atualização.</p>
+      ) : visao === "confrontos" ? (
+        <div>
+          <ChaveMM slots={slots} />
+          {grupos.map(function (g) {
+            var comJogo = g.nums.map(function (n) { return slots[n - 1]; }).filter(function (s) { return s.tie; });
+            if (comJogo.length === 0) return null;
+            return (
+              <div key={g.titulo}>
+                <h3 className="text-sm font-bold text-slate-200 mb-2">{g.titulo}</h3>
+                {comJogo.map(function (s) { return <CardConfrontoMM key={s.n} slot={s} />; })}
+              </div>
+            );
+          })}
+          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Quem avança na chave: mais subs vencidos no confronto (saldo de gols desempata). Critério provisório até a FPFS confirmar.</p>
+        </div>
+      ) : (
+        <AgendaMM jogos={jogosSerie} />
+      )}
+    </div>
+  );
+}
+
 function AbaArtilharia() {
   const [campeonato, setCampeonato] = useState("paulista");
   const [categoria, setCategoria] = useState(CATEGORIAS[0]);
@@ -1162,6 +1621,7 @@ function AbaArtilharia() {
 const TABS = [
   { id: "acesso", label: "Geral", icon: "🏆" },
   { id: "geral", label: "Classificação União", icon: "🥇" },
+  { id: "matamata", label: "Mata-mata", icon: "⚔️" },
   { id: "jogos", label: "Jogos", icon: "📅" },
   { id: "artilharia", label: "Artilharia", icon: "⚽" },
 ];
@@ -1178,6 +1638,7 @@ function App() {
             {tab === "geral" && "Classificação União"}
             {tab === "acesso" && "Classificação Geral"}
             {tab === "jogos" && "Resultados / Jogos"}
+            {tab === "matamata" && "Mata-mata · Torneio União"}
             {tab === "artilharia" && "Artilharia"}
           </h1>
         </div>
@@ -1189,6 +1650,7 @@ function App() {
       <main>
         {tab === "acesso" && <AbaAcesso />}
         {tab === "geral" && <AbaGeralUniao />}
+        {tab === "matamata" && <AbaMataMata />}
         {tab === "jogos" && <AbaJogos />}
         {tab === "artilharia" && <AbaArtilharia />}
         <p className="text-center text-[10px] text-slate-500 mt-4 px-6">
@@ -1197,7 +1659,7 @@ function App() {
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-20 bg-slate-950/95 backdrop-blur border-t border-slate-800 safe-bottom">
-        <div className="max-w-lg mx-auto grid grid-cols-4">
+        <div className="max-w-lg mx-auto grid grid-cols-5">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -1236,6 +1698,12 @@ async function iniciarApp() {
       categoria: t[0], grupo: t[1], status: t[2], data: t[3], hora: t[4],
       local: t[5], mandante: t[6], visitante: t[7],
       golsMandante: t[8], golsVisitante: t[9], wo: false,
+    }));
+    MATAMATA_UNIAO = (dados.matamataUniao || []).map((t, i) => ({
+      id: 200000 + i,
+      categoria: t[0], fase: t[1], serie: t[2], status: t[3], data: t[4], hora: t[5],
+      local: t[6], mandante: t[7], visitante: t[8],
+      golsMandante: t[9], golsVisitante: t[10], wo: false,
     }));
     ARTILHEIROS = construirArtilharia();
     window.__dadosAtualizadoEm = dados.atualizadoEm || null;
