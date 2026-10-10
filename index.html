@@ -1151,12 +1151,17 @@ function rotuloDiaMM(iso) {
   return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit" });
 }
 
+var ALIAS_MM = { "GUARULHENSETBCTRANSPORTES": "GUARULHENSETBCTRANPORTES", "PROSPEREHORTOLANDIAB": "ECHORTOLANDIAB", "RSOCCER": "RSOCCERCFAASSOCIACAOESPORTIVAECULTURAL", "LIGAATIBAIAENSEDEFUITSALLAFS": "ATIBAIAFUTSALLAFS" };
+function kMM(nome) {
+  var n = nomeCurto(nome || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z0-9]/g, "");
+  return ALIAS_MM[n] || n;
+}
 function construirConfrontosMM() {
   var classif = classificacaoAcessoA2();
   var pos = {};
   var total = {};
   var pts = {};
-  classif.forEach(function (r) { pos[nomeCurto(r.nome)] = r.posicao; total[nomeCurto(r.nome)] = r.total; pts[nomeCurto(r.nome)] = r.pontos; });
+  classif.forEach(function (r) { pos[kMM(r.nome)] = r.posicao; total[kMM(r.nome)] = r.total; pts[kMM(r.nome)] = r.pontos; });
   var mapa = new Map();
   MATAMATA_UNIAO.forEach(function (j) {
     var par = [j.mandante, j.visitante].sort();
@@ -1167,7 +1172,7 @@ function construirConfrontosMM() {
   return Array.from(mapa.values()).map(function (c) {
     var a = c.par[0];
     var b = c.par[1];
-    if ((pos[nomeCurto(b)] || 999) < (pos[nomeCurto(a)] || 999)) { var tmp = a; a = b; b = tmp; }
+    if ((pos[kMM(b)] || 999) < (pos[kMM(a)] || 999)) { var tmp = a; a = b; b = tmp; }
     var porSub = CATEGORIAS.map(function (cat) {
       var jogos = c.jogos.filter(function (j) { return j.categoria === cat; }).sort(function (x, y) { return dataHoraJogoMM(x) - dataHoraJogoMM(y); });
       var ga = 0, gb = 0, jogados = 0;
@@ -1179,10 +1184,11 @@ function construirConfrontosMM() {
       });
       var decidido = jogados >= 2;
       var vencedor = decidido ? (ga > gb ? a : (gb > ga ? b : null)) : null;
-      return { categoria: cat, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor };
+      var lidera = jogados >= 1 ? (ga > gb ? a : (gb > ga ? b : null)) : null;
+      return { categoria: cat, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor, lidera: lidera };
     });
-    var vitA = porSub.filter(function (s) { return s.vencedor === a; }).length;
-    var vitB = porSub.filter(function (s) { return s.vencedor === b; }).length;
+    var vitA = porSub.filter(function (s) { return s.lidera === a; }).length;
+    var vitB = porSub.filter(function (s) { return s.lidera === b; }).length;
     var golsA = porSub.reduce(function (t, s) { return t + s.ga; }, 0);
     var golsB = porSub.reduce(function (t, s) { return t + s.gb; }, 0);
     var decididos = porSub.filter(function (s) { return s.decidido; }).length;
@@ -1190,7 +1196,7 @@ function construirConfrontosMM() {
     if (decididos === 4) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
     return {
       serie: c.serie, fase: c.fase, a: a, b: b,
-      posA: pos[nomeCurto(a)], posB: pos[nomeCurto(b)], totalA: total[nomeCurto(a)], totalB: total[nomeCurto(b)], ptsA: pts[nomeCurto(a)], ptsB: pts[nomeCurto(b)],
+      posA: pos[kMM(a)], posB: pos[kMM(b)], totalA: total[kMM(a)], totalB: total[kMM(b)], ptsA: pts[kMM(a)], ptsB: pts[kMM(b)],
       porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos,
       emp: porSub.filter(function (s) { return s.decidido && !s.vencedor; }).length,
       vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
@@ -1392,7 +1398,7 @@ function CardConfrontoMM({ slot }) {
               <span className="text-slate-500 text-sm">×</span>
               <span className="text-3xl font-black text-white tabular-nums">{c.vitB}</span>
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.emp > 0 ? (" · " + c.emp + " emp.") : ""}</div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.decididos < 4 ? " · parcial" : ""}{c.emp > 0 ? (" · " + c.emp + " emp.") : ""}</div>
             <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-extrabold tabular-nums">
               <span className={corSal(sal)}>{fs(sal)}</span>
               <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold">saldo</span>
