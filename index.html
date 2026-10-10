@@ -1398,7 +1398,17 @@ function CardConfrontoMM({ slot }) {
               <span className="text-slate-500 text-sm">×</span>
               <span className="text-3xl font-black text-white tabular-nums">{c.vitB}</span>
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.decididos < 4 ? " · parcial" : ""}{c.emp > 0 ? (" · " + c.emp + " emp.") : ""}</div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.decididos < 4 ? " · parcial" : ""}</div>
+            <div className="mt-1.5 flex items-center justify-center gap-1.5">
+              {c.porSub.map(function (s) {
+                var cor = s.jogados === 0 ? "bg-slate-700 text-slate-500" : (s.ga > s.gb ? "bg-sky-500 text-slate-950" : (s.gb > s.ga ? "bg-fuchsia-500 text-slate-950" : "bg-amber-400 text-slate-950"));
+                return <span key={s.categoria} className={"w-6 h-6 rounded-md text-[10px] font-black flex items-center justify-center " + cor} title={s.categoria + (s.jogados === 0 ? ": a jogar" : (s.ga === s.gb ? ": empate" : ": vitória"))}>{s.categoria.replace(/\D/g, "")}</span>;
+              })}
+            </div>
+            <div className="mt-1 text-[9px] font-semibold tabular-nums flex items-center justify-center gap-2">
+              <span className="text-amber-300">{c.porSub.filter(function (s) { return s.jogados >= 1 && s.ga === s.gb; }).length} empates</span>
+              <span className="text-slate-500">{c.porSub.filter(function (s) { return s.jogados === 0; }).length} a jogar</span>
+            </div>
             <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-extrabold tabular-nums">
               <span className={corSal(sal)}>{fs(sal)}</span>
               <span className="text-[8px] uppercase tracking-wider text-slate-500 font-bold">saldo</span>
