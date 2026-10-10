@@ -274,6 +274,20 @@ async function acharAbaPorTexto(page, textoParcial) {
         else uniaoPorJogador.set(l.jogador, { jogador: l.jogador, clube, gols: l.gols });
       });
     }
+    // Mata-mata do Torneio União: cada jogo (ida/volta) é uma aba própria na artilharia; soma os gols no ranking da União.
+    const abasArt = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[role="tab"]')).map((t) => ({ texto: t.textContent.trim(), id: (t.getAttribute("href") || "").slice(1) }))
+    );
+    for (const aba of abasArt) {
+      if (!aba.id || !ehMataMataUniao(aba.texto)) continue;
+      const linhasMM = await extrairArtilharia(page, aba.id);
+      linhasMM.forEach((l) => {
+        const clube = normalizarClube(l.clube);
+        const atual = uniaoPorJogador.get(l.jogador);
+        if (atual) atual.gols += l.gols;
+        else uniaoPorJogador.set(l.jogador, { jogador: l.jogador, clube, gols: l.gols });
+      });
+    }
     const uniaoRanking = Array.from(uniaoPorJogador.values()).sort((a, b) => b.gols - a.gols);
 
     const paulistaRanking = geralTop
