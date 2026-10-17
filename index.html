@@ -1175,30 +1175,34 @@ function construirConfrontosMM() {
     if ((pos[kMM(b)] || 999) < (pos[kMM(a)] || 999)) { var tmp = a; a = b; b = tmp; }
     var porSub = CATEGORIAS.map(function (cat) {
       var jogos = c.jogos.filter(function (j) { return j.categoria === cat; }).sort(function (x, y) { return dataHoraJogoMM(x) - dataHoraJogoMM(y); });
-      var ga = 0, gb = 0, jogados = 0;
+      var ga = 0, gb = 0, jogados = 0, vA = 0, vB = 0, eg = 0;
       jogos.forEach(function (j) {
         if (j.status !== "finalizado") return;
         jogados++;
-        if (j.mandante === a) { ga += j.golsMandante; gb += j.golsVisitante; }
-        else { gb += j.golsMandante; ga += j.golsVisitante; }
+        var gjA = j.mandante === a ? j.golsMandante : j.golsVisitante;
+        var gjB = j.mandante === a ? j.golsVisitante : j.golsMandante;
+        ga += gjA; gb += gjB;
+        if (gjA > gjB) vA++; else if (gjB > gjA) vB++; else eg++;
       });
       var decidido = jogados >= 2;
       var vencedor = decidido ? (ga > gb ? a : (gb > ga ? b : null)) : null;
       var lidera = jogados >= 1 ? (ga > gb ? a : (gb > ga ? b : null)) : null;
-      return { categoria: cat, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor, lidera: lidera };
+      return { categoria: cat, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor, lidera: lidera, vA: vA, vB: vB, eg: eg };
     });
-    var vitA = porSub.filter(function (s) { return s.lidera === a; }).length;
-    var vitB = porSub.filter(function (s) { return s.lidera === b; }).length;
+    var vitA = porSub.reduce(function (t, s) { return t + s.vA; }, 0);
+    var vitB = porSub.reduce(function (t, s) { return t + s.vB; }, 0);
     var golsA = porSub.reduce(function (t, s) { return t + s.ga; }, 0);
     var golsB = porSub.reduce(function (t, s) { return t + s.gb; }, 0);
     var decididos = porSub.filter(function (s) { return s.decidido; }).length;
+    var jogosFeitos = porSub.reduce(function (t, s) { return t + s.jogados; }, 0);
+    var empJogos = porSub.reduce(function (t, s) { return t + s.eg; }, 0);
     var lider = null;
     if (decididos === 4) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
     return {
       serie: c.serie, fase: c.fase, a: a, b: b,
       posA: pos[kMM(a)], posB: pos[kMM(b)], totalA: total[kMM(a)], totalB: total[kMM(b)], ptsA: pts[kMM(a)], ptsB: pts[kMM(b)],
-      porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos,
-      emp: porSub.filter(function (s) { return s.decidido && !s.vencedor; }).length,
+      porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos, jogosFeitos: jogosFeitos,
+      emp: empJogos,
       vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
     };
   }).sort(function (x, y) { return (x.posA || 999) - (y.posA || 999); });
@@ -1290,7 +1294,7 @@ function ChaveMM({ slots }) {
   };
   return (
     <div className="mb-4">
-      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Chaveamento · subs vencidos e saldo de gols</div>
+      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Chaveamento · vitórias nos jogos e saldo de gols</div>
       <div className="overflow-x-auto -mx-3 px-3 pb-1">
         <div className="flex items-stretch gap-2 min-w-max">
           {Object.keys(ordem).map(function (titulo, ci) {
@@ -1387,7 +1391,7 @@ function CardConfrontoMM({ slot }) {
       <div className="px-3 pt-3 pb-2.5">
         <div className="flex items-center justify-between text-[10px] mb-2.5">
           <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.fase} · {c.serie}</span>
-          <span className="text-slate-400">{c.decididos}/4 subs decididos</span>
+          <span className="text-slate-400">{c.jogosFeitos}/8 jogos</span>
         </div>
         {disputaMM(slot.n, c.serie) ? <div className={"text-center text-[11px] font-bold mb-2 " + st.text}>{disputaMM(slot.n, c.serie)}</div> : null}
         <div className="flex items-center gap-2">
@@ -1398,16 +1402,16 @@ function CardConfrontoMM({ slot }) {
               <span className="text-slate-500 text-sm">×</span>
               <span className="text-3xl font-black text-white tabular-nums">{c.vitB}</span>
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-slate-400">subs vencidos{c.decididos < 4 ? " · parcial" : ""}</div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400">vitórias nos jogos{c.decididos < 4 ? " · parcial" : ""}</div>
             <div className="mt-1.5 flex items-center justify-center gap-1.5">
               {c.porSub.map(function (s) {
-                var cor = s.jogados === 0 ? "bg-slate-700 text-slate-500" : (s.ga > s.gb ? "bg-sky-500 text-slate-950" : (s.gb > s.ga ? "bg-fuchsia-500 text-slate-950" : "bg-amber-400 text-slate-950"));
-                return <span key={s.categoria} className={"w-6 h-6 rounded-md text-[10px] font-black flex items-center justify-center " + cor} title={s.categoria + (s.jogados === 0 ? ": a jogar" : (s.ga === s.gb ? ": empate" : ": vitória"))}>{s.categoria.replace(/\D/g, "")}</span>;
+                var cor = s.jogados === 0 ? "bg-slate-700 text-slate-500" : (s.vA > s.vB ? "bg-sky-500 text-slate-950" : (s.vB > s.vA ? "bg-fuchsia-500 text-slate-950" : "bg-amber-400 text-slate-950"));
+                return <span key={s.categoria} className={"w-6 h-6 rounded-md text-[10px] font-black flex items-center justify-center " + cor} title={s.categoria + ": " + s.vA + "V " + s.eg + "E " + s.vB + "D (clube da esquerda)"}>{s.categoria.replace(/\D/g, "")}</span>;
               })}
             </div>
             <div className="mt-1 text-[9px] font-semibold tabular-nums flex items-center justify-center gap-2">
-              <span className="text-amber-300">{c.porSub.filter(function (s) { return s.jogados >= 1 && s.ga === s.gb; }).length} empates</span>
-              <span className="text-slate-500">{c.porSub.filter(function (s) { return s.jogados === 0; }).length} a jogar</span>
+              <span className="text-amber-300">{c.emp} {c.emp === 1 ? "empate" : "empates"}</span>
+              <span className="text-slate-500">{8 - c.jogosFeitos} a jogar</span>
             </div>
             <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-extrabold tabular-nums">
               <span className={corSal(sal)}>{fs(sal)}</span>
@@ -1570,7 +1574,7 @@ function AbaMataMata() {
         <div className="absolute -right-3 -top-3 text-7xl opacity-10 select-none">⚔️</div>
         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Torneio União · Mata-mata</div>
         <h2 className="text-lg font-black text-white leading-tight mt-0.5">Ida e volta nos 4 subs</h2>
-        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas pelo Geral: 1º×8º, 2º×7º, 3º×6º e 4º×5º. Passa quem vence mais subs; se empatar nas vitórias, decide o saldo de gols.</p>
+        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas pelo Geral: 1º×8º, 2º×7º, 3º×6º e 4º×5º. Passa quem somar mais vitórias nos 8 jogos (ida e volta dos 4 subs); se empatar, decide o saldo de gols.</p>
         {emAndamento.length > 0 ? (
           <div className="rounded-lg bg-rose-500/15 border border-rose-400/30 px-2.5 py-2 mb-2.5">
             <div className="text-xs font-bold text-rose-300">🔴 Bola rolando: {emAndamento.length} {emAndamento.length === 1 ? "jogo em andamento" : "jogos em andamento"}</div>
@@ -1652,7 +1656,7 @@ function AbaMataMata() {
               : <CardADefinirMM key={n} slot={s} serie={serie} fase={faseSel} />;
           })}
 
-          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem vencer mais subs no confronto; empate nas vitórias, decide o saldo de gols somado dos 4 subs.</p>
+          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem somar mais vitórias em todos os jogos do confronto (4 subs, ida e volta); empate nas vitórias, decide o saldo de gols somado.</p>
         </div>
       ) : (
         <AgendaMM jogos={jogosSerie} />
