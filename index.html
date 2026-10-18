@@ -13,6 +13,12 @@
   ::-webkit-scrollbar { height: 6px; width: 6px; }
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+@keyframes mmShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.mm-shine{background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.14) 50%,transparent 70%);animation:mmShine 2.8s ease-in-out infinite}
+@keyframes mmPulse{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}50%{box-shadow:0 0 0 7px rgba(52,211,153,0)}}
+.mm-pulse{animation:mmPulse 2s infinite}
+@keyframes mmConf{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) + 40px)) scale(.4) rotate(220deg);opacity:0}}
+.mm-confete{position:absolute;width:7px;height:10px;border-radius:2px;animation:mmConf 1.6s ease-out forwards}
 </style>
 </head>
 <body class="text-slate-800">
@@ -1246,11 +1252,12 @@ function CronometroMM({ alvo, agora }) {
   );
 }
 
-function LinhaNoChaveMM({ nome, vit, saldo, destaque }) {
+function LinhaNoChaveMM({ nome, vit, saldo, destaque, classif }) {
   return (
     <div className={"flex items-center gap-1.5 " + (destaque ? "text-white" : "text-slate-400")}>
       <Escudo nome={nome} size="w-4 h-4" />
       <span className="text-[10px] font-semibold truncate flex-1">{nomeCurto(nome)}</span>
+      {classif ? <span className="text-[8px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 rounded px-1">✓</span> : null}
       <span className="text-[9px] tabular-nums text-slate-500">{saldo > 0 ? "+" + saldo : saldo}</span>
       <span className={"text-[11px] font-extrabold tabular-nums " + (destaque ? "text-emerald-400" : "")}>{vit}</span>
     </div>
@@ -1279,8 +1286,8 @@ function NoChaveMM({ slot }) {
     <div className="w-[140px] rounded-lg border border-slate-600 bg-slate-800/80 px-2 py-1.5 shadow">
       {cab}
       <div className="space-y-1">
-        <LinhaNoChaveMM nome={c.a} vit={c.vitA} saldo={sa} destaque={lider === "a"} />
-        <LinhaNoChaveMM nome={c.b} vit={c.vitB} saldo={-sa} destaque={lider === "b"} />
+        <LinhaNoChaveMM nome={c.a} vit={c.vitA} saldo={sa} destaque={lider === "a"} classif={c.vencedor === c.a} />
+        <LinhaNoChaveMM nome={c.b} vit={c.vitB} saldo={-sa} destaque={lider === "b"} classif={c.vencedor === c.b} />
       </div>
     </div>
   );
@@ -1320,12 +1327,18 @@ function ChaveMM({ slots }) {
   );
 }
 
-function LadoClubeMM({ nome, pos, cor }) {
+function LadoClubeMM({ nome, pos, cor, estado }) {
+  var cl = estado === "class";
+  var el = estado === "elim";
   return (
-    <div className="flex-1 min-w-0 flex flex-col items-center text-center">
-      <Escudo nome={nome} size="w-12 h-12" />
+    <div className={"flex-1 min-w-0 flex flex-col items-center text-center transition " + (el ? "opacity-55 grayscale" : "")}>
+      <div className={"relative rounded-full " + (cl ? "ring-2 ring-emerald-400 mm-pulse" : "")}>
+        <Escudo nome={nome} size="w-12 h-12" />
+        {cl ? <span className="absolute -top-1 -right-1 text-[10px] bg-emerald-400 text-slate-950 font-black rounded-full w-4 h-4 flex items-center justify-center">✓</span> : null}
+      </div>
       <div className="mt-1 text-[11px] font-bold leading-tight text-white w-full truncate">{nomeCurto(nome)}</div>
       {pos ? <span className={"mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full border " + cor}>{pos}º no Geral</span> : null}
+      {cl ? <span className="mt-1 text-[8px] font-black uppercase tracking-wider text-emerald-300">Classificado</span> : null}
     </div>
   );
 }
@@ -1376,6 +1389,51 @@ function LinhaSubMM({ s }) {
   );
 }
 
+function proximoMM(n) {
+  var m = { 1: ["J5 · Semifinal", "J7 · Semifinal"], 2: ["J5 · Semifinal", "J7 · Semifinal"], 3: ["J6 · Semifinal", "J8 · Semifinal"], 4: ["J6 · Semifinal", "J8 · Semifinal"], 5: ["J9 · Final", "J10 · Final"], 6: ["J9 · Final", "J10 · Final"], 7: ["J11 · Final", "J12 · Final"], 8: ["J11 · Final", "J12 · Final"] };
+  return m[n] ? { v: m[n][0], p: m[n][1] } : null;
+}
+
+function ClassificadoMM({ c, n }) {
+  var [burst, setBurst] = useState(0);
+  useEffect(function () {
+    if (!burst) return;
+    var t = setTimeout(function () { setBurst(0); }, 1800);
+    return function () { clearTimeout(t); };
+  }, [burst]);
+  var venc = c.vencedor;
+  var perd = c.perdedor;
+  var vitV = venc === c.a ? c.vitA : c.vitB;
+  var vitP = venc === c.a ? c.vitB : c.vitA;
+  var porSaldo = c.vitA === c.vitB;
+  var saldoV = venc === c.a ? c.golsA - c.golsB : c.golsB - c.golsA;
+  var prox = proximoMM(n);
+  var cores = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa"];
+  return (
+    <div className="relative overflow-hidden mb-3 rounded-xl border border-emerald-400/40 bg-gradient-to-r from-emerald-500/20 via-emerald-400/10 to-emerald-500/20 px-3 py-2">
+      <div className="mm-shine absolute inset-0 pointer-events-none" />
+      <div className="relative flex items-center gap-2">
+        <span className="text-xl">{n >= 9 ? "🏆" : "✅"}</span>
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] font-black uppercase tracking-wide text-emerald-300 truncate">{nomeCurto(venc)} {n >= 9 ? "venceu a disputa" : "classificado"}</div>
+          <div className="text-[10px] text-slate-300">{vitV} × {vitP} em vitórias nos 8 jogos{porSaldo ? " · desempate no saldo de gols (" + (saldoV > 0 ? "+" : "") + saldoV + ")" : ""}</div>
+          {prox ? <div className="text-[10px] text-emerald-200/80 mt-0.5">Segue para {prox.v}{perd ? " · " + nomeCurto(perd) + " vai para " + prox.p : ""}</div> : null}
+        </div>
+        <button type="button" onClick={function () { setBurst(Date.now()); }} className="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-400 text-slate-950 active:scale-95">🎉 Comemorar</button>
+      </div>
+      {burst ? (
+        <div className="absolute inset-0 pointer-events-none">
+          {Array.from({ length: 28 }).map(function (_, i) {
+            var ang = (i / 28) * 2 * Math.PI;
+            var dist = 50 + (i % 5) * 18;
+            return <span key={i} className="mm-confete" style={{ "--dx": Math.cos(ang) * dist + "px", "--dy": Math.sin(ang) * dist * 0.7 + "px", background: cores[i % 5], left: "50%", top: "50%" }} />;
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function CardConfrontoMM({ slot }) {
   var c = slot.tie;
   var st = SERIE_MM_STYLE[c.serie] || SERIE_MM_STYLE.Ouro;
@@ -1394,8 +1452,9 @@ function CardConfrontoMM({ slot }) {
           <span className="text-slate-400">{c.jogosFeitos}/8 jogos</span>
         </div>
         {disputaMM(slot.n, c.serie) ? <div className={"text-center text-[11px] font-bold mb-2 " + st.text}>{disputaMM(slot.n, c.serie)}</div> : null}
+        {c.vencedor ? <ClassificadoMM c={c} n={slot.n} /> : null}
         <div className="flex items-center gap-2">
-          <LadoClubeMM nome={c.a} pos={c.posA} cor="bg-sky-500/15 text-sky-300 border-sky-400/30" />
+          <LadoClubeMM nome={c.a} pos={c.posA} cor="bg-sky-500/15 text-sky-300 border-sky-400/30" estado={c.vencedor ? (c.vencedor === c.a ? "class" : "elim") : null} />
           <div className="text-center shrink-0 px-1">
             <div className="flex items-baseline justify-center gap-1.5">
               <span className="text-3xl font-black text-white tabular-nums">{c.vitA}</span>
@@ -1419,7 +1478,7 @@ function CardConfrontoMM({ slot }) {
               <span className={corSal(-sal)}>{fs(-sal)}</span>
             </div>
           </div>
-          <LadoClubeMM nome={c.b} pos={c.posB} cor="bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-400/30" />
+          <LadoClubeMM nome={c.b} pos={c.posB} cor="bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-400/30" estado={c.vencedor ? (c.vencedor === c.b ? "class" : "elim") : null} />
         </div>
         <div className="mt-3">
           <div className="h-1.5 rounded-full overflow-hidden flex bg-slate-700">
