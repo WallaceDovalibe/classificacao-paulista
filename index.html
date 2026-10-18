@@ -1264,7 +1264,9 @@ function LinhaNoChaveMM({ nome, vit, saldo, destaque, classif }) {
   );
 }
 
-function NoChaveMM({ slot }) {
+var FEED_MM = { 5: [1, 4, "v"], 6: [2, 3, "v"], 7: [1, 4, "p"], 8: [2, 3, "p"], 9: [5, 6, "v"], 10: [5, 6, "p"], 11: [7, 8, "v"], 12: [7, 8, "p"] };
+
+function NoChaveMM({ slot, slots }) {
   var c = slot.tie;
   var cab = (
     <div className="flex items-center justify-between mb-1">
@@ -1273,10 +1275,33 @@ function NoChaveMM({ slot }) {
     </div>
   );
   if (!c) {
+    var fd = FEED_MM[slot.n];
+    var parts = fd && slots ? [fd[0], fd[1]].map(function (f) {
+      var tf = slots[f - 1] && slots[f - 1].tie;
+      var nm = tf && tf.vencedor ? (fd[2] === "v" ? tf.vencedor : tf.perdedor) : null;
+      return { f: f, nome: nm };
+    }) : [];
+    var algum = parts.some(function (p) { return p.nome; });
     return (
-      <div className="w-[140px] rounded-lg border border-dashed border-slate-600 bg-slate-800/30 px-2 py-1.5">
+      <div className={"w-[140px] rounded-lg border border-dashed px-2 py-1.5 " + (algum ? "border-emerald-500/50 bg-emerald-500/5" : "border-slate-600 bg-slate-800/30")}>
         {cab}
-        <div className="text-[10px] font-semibold text-slate-500 leading-tight py-1">A definir</div>
+        {algum ? (
+          <div className="space-y-1">
+            {parts.map(function (p) {
+              return p.nome ? (
+                <div key={p.f} className="flex items-center gap-1.5 text-white">
+                  <Escudo nome={p.nome} size="w-4 h-4" />
+                  <span className="text-[10px] font-semibold truncate flex-1">{nomeCurto(p.nome)}</span>
+                  <span className="text-[8px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-400/40 rounded px-1">✓</span>
+                </div>
+              ) : (
+                <div key={p.f} className="text-[10px] text-slate-500 italic">aguardando J{p.f}</div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-[10px] font-semibold text-slate-500 leading-tight py-1">A definir</div>
+        )}
       </div>
     );
   }
@@ -1312,7 +1337,7 @@ function ChaveMM({ slots }) {
                   {ordem[titulo].map(function (n) {
                     return (
                       <div key={n} className="flex items-center">
-                        <NoChaveMM slot={slots[n - 1]} />
+                        <NoChaveMM slot={slots[n - 1]} slots={slots} />
                         {ci < 2 ? <div className="w-3 h-px bg-slate-600" /> : null}
                       </div>
                     );
@@ -1390,7 +1415,7 @@ function LinhaSubMM({ s }) {
 }
 
 function proximoMM(n) {
-  var m = { 1: ["J5 · Semifinal", "J7 · Semifinal"], 2: ["J5 · Semifinal", "J7 · Semifinal"], 3: ["J6 · Semifinal", "J8 · Semifinal"], 4: ["J6 · Semifinal", "J8 · Semifinal"], 5: ["J9 · Final", "J10 · Final"], 6: ["J9 · Final", "J10 · Final"], 7: ["J11 · Final", "J12 · Final"], 8: ["J11 · Final", "J12 · Final"] };
+  var m = { 1: ["J5 · Semifinal", "J7 · Semifinal"], 2: ["J6 · Semifinal", "J8 · Semifinal"], 3: ["J6 · Semifinal", "J8 · Semifinal"], 4: ["J5 · Semifinal", "J7 · Semifinal"], 5: ["J9 · Final", "J10 · Final"], 6: ["J9 · Final", "J10 · Final"], 7: ["J11 · Final", "J12 · Final"], 8: ["J11 · Final", "J12 · Final"] };
   return m[n] ? { v: m[n][0], p: m[n][1] } : null;
 }
 
