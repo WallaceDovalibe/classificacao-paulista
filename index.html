@@ -1266,6 +1266,20 @@ function LinhaNoChaveMM({ nome, vit, saldo, destaque, classif }) {
 
 var FEED_MM = { 5: [1, 4, "v"], 6: [2, 3, "v"], 7: [1, 4, "p"], 8: [2, 3, "p"], 9: [5, 6, "v"], 10: [5, 6, "p"], 11: [7, 8, "v"], 12: [7, 8, "p"] };
 
+var ROTA_MM = { 1: [5, 7], 2: [6, 8], 3: [6, 8], 4: [5, 7], 5: [9, 10], 6: [9, 10], 7: [11, 12], 8: [11, 12] };
+
+function RotaMM({ n, serie }) {
+  var r = ROTA_MM[n];
+  if (!r) return null;
+  var lab = function (j) { return j >= 9 ? " · " + (posFinalMM(j, serie) || "") : ""; };
+  return (
+    <div className="mt-1.5 pt-1 border-t border-white/10 space-y-0.5 text-[8px] font-bold uppercase tracking-wide leading-tight">
+      <div className="text-emerald-300 truncate">✓ Vence → J{r[0]}{lab(r[0])}</div>
+      <div className="text-amber-300 truncate">✕ Perde → J{r[1]}{lab(r[1])}</div>
+    </div>
+  );
+}
+
 function NoChaveMM({ slot, slots }) {
   var c = slot.tie;
   var cab = (
@@ -1302,6 +1316,7 @@ function NoChaveMM({ slot, slots }) {
         ) : (
           <div className="text-[10px] font-semibold text-slate-500 leading-tight py-1">A definir</div>
         )}
+        <RotaMM n={slot.n} serie={slot.serie} />
       </div>
     );
   }
@@ -1314,6 +1329,7 @@ function NoChaveMM({ slot, slots }) {
         <LinhaNoChaveMM nome={c.a} vit={c.vitA} saldo={sa} destaque={lider === "a"} classif={c.vencedor === c.a} />
         <LinhaNoChaveMM nome={c.b} vit={c.vitB} saldo={-sa} destaque={lider === "b"} classif={c.vencedor === c.b} />
       </div>
+      <RotaMM n={slot.n} serie={slot.serie} />
     </div>
   );
 }
@@ -1338,7 +1354,7 @@ function ChaveMM({ slots }) {
                     return (
                       <div key={n} className="flex items-center">
                         <NoChaveMM slot={slots[n - 1]} slots={slots} />
-                        {ci < 2 ? <div className="w-3 h-px bg-slate-600" /> : null}
+                        
                       </div>
                     );
                   })}
