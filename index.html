@@ -643,6 +643,29 @@ function construirArtilharia() {
 let JOGOS_UNIAO = [];
 let JOGOS_PAULISTA = []; // jogos do Campeonato Paulista (grupo = fase)
 let MATAMATA_UNIAO = []; // mata-mata do Torneio União (ida e volta)
+
+// PRÉVIA (não oficial) das semifinais, enquanto a FPFS não publica as abas. Cada confronto
+// só é usado se NÃO houver nenhum jogo oficial de semifinal entre os dois clubes nos dados.
+var PREVIA_MM = [
+  { serie: "Ouro", fase: "Semifinal", mand: ["RESILIENCE FUTSAL", "ASSOCIAÇÃO MORADORES JARDIM LÍDER Z/N - FÚRIA F.S."],
+    ida: { data: "2026-10-31", hora: "14:00", local: "CE JOERG BRUDER" }, volta: { data: "2026-11-08", hora: "14:30", local: "GINÁSIO DO CDC CURTIBALL" } },
+  { serie: "Ouro", fase: "Semifinal", mand: ["INSTITUTO F9+", "A.E. COMPANY SPORTS"],
+    ida: { data: "2026-11-01", hora: "15:00", local: "GINÁSIO CIE PIETRA MEDEIROS" }, volta: { data: "2026-11-08", hora: "14:00", local: "GINÁSIO DA COMUNIDADE ARMÊNIA DE OSASCO" } },
+];
+function previaMM(base) {
+  var out = [];
+  PREVIA_MM.forEach(function (p, pi) {
+    var existe = base.some(function (j) { return j.serie === p.serie && j.fase === p.fase && (j.mandante === p.mand[0] || j.mandante === p.mand[1]); });
+    if (existe) return;
+    CATEGORIAS.forEach(function (cat, ci) {
+      [["ida", p.mand[0], p.mand[1]], ["volta", p.mand[1], p.mand[0]]].forEach(function (x, k) {
+        var g = p[x[0]];
+        out.push({ id: 900000 + pi * 100 + ci * 10 + k, categoria: cat, fase: p.fase, serie: p.serie, status: "agendado", data: g.data, hora: g.hora, local: g.local, mandante: x[1], visitante: x[2], golsMandante: null, golsVisitante: null, wo: false, previa: true });
+      });
+    });
+  });
+  return out;
+}
 let ARTILHEIROS = [];
 
 /* ---- Cards da Aba "Jogos e Resultados" ---- */
@@ -1397,7 +1420,7 @@ function PernaMM({ j, rotulo }) {
   return (
     <div className="flex-1 min-w-0 rounded-lg bg-slate-800/70 border border-slate-700/70 px-1.5 py-1">
       <div className="flex justify-between gap-1 text-[8px] uppercase tracking-wider font-bold">
-        <span className="text-slate-400">{rotulo}</span>
+        <span className="text-slate-400">{rotulo}{j.previa ? " · prévia" : ""}</span>
         <span className={feito ? "text-slate-500" : "text-emerald-400"}>{formatarDataCurta(j.data)}{!feito && j.hora ? " · " + j.hora : ""}</span>
       </div>
       <div className="flex items-center justify-center gap-1 mt-0.5">
@@ -1888,6 +1911,7 @@ async function iniciarApp() {
       local: t[6], mandante: t[7], visitante: t[8],
       golsMandante: t[9], golsVisitante: t[10], wo: false,
     }));
+    MATAMATA_UNIAO = MATAMATA_UNIAO.concat(previaMM(MATAMATA_UNIAO));
     ARTILHEIROS = construirArtilharia();
     window.__dadosAtualizadoEm = dados.atualizadoEm || null;
   } catch (e) {
