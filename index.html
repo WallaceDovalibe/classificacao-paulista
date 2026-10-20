@@ -1630,6 +1630,11 @@ function posFinalMM(n, serie) {
 }
 
 function disputaMM(n, serie) {
+  var semi = { 5: [1, 4], 6: [1, 4], 7: [5, 8], 8: [5, 8] };
+  if (semi[n]) {
+    var b = Math.max(0, SERIES_MM.indexOf(serie)) * 8;
+    return "Disputa do " + (b + semi[n][0]) + "º ao " + (b + semi[n][1]) + "º lugar";
+  }
   var p = posFinalMM(n, serie);
   return p ? "Disputa do " + p + " lugar" : null;
 }
