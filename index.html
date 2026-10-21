@@ -1813,8 +1813,7 @@ function AbaArtilharia() {
   const ranking = useMemo(() => {
     return ARTILHEIROS
       .filter((j) => j.campeonato === campeonato && j.categoria === categoria && (!clubeSel || j.clube === clubeSel))
-      .sort((a, b) => b.gols - a.gols)
-      .slice(0, 100);
+      .sort((a, b) => b.gols - a.gols);
   }, [campeonato, categoria, clubeSel]);
 
   return (
@@ -1832,7 +1831,7 @@ function AbaArtilharia() {
       </div>
       <div className="px-3 pt-1">
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md px-2 py-1 mb-3">
-          <span>✅</span><span>Dados reais — eventos.admfutsal.com.br/evento/&#123;id&#125;/artilharia, {textoUltimaAtualizacao()} (top 100 por categoria).</span>
+          <span>✅</span><span>Dados reais — eventos.admfutsal.com.br/evento/&#123;id&#125;/artilharia, {textoUltimaAtualizacao()} (todos os jogadores que fizeram gol).</span>
         </div>
         <p className="text-[10px] text-slate-500 mb-3 leading-snug">
           <strong className="text-slate-400">Torneio União</strong>: soma direta dos gols de cada jogador nas abas oficiais "TORNEIO UNIÃO – GRUPO 1 a 6".{" "}
