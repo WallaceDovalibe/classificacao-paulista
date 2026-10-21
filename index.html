@@ -1606,6 +1606,11 @@ function AgendaMM({ jogos }) {
 
 function faseAtualMM(confrontos) {
   var ordem = ["Quartas", "Semifinal", "Final"];
+  var semis = confrontos.filter(function (c) { return c.fase === "Semifinal"; });
+  if (semis.length > 0) {
+    var finais = confrontos.filter(function (c) { return c.fase === "Final"; });
+    return (finais.length > 0 && semis.every(function (c) { return c.decididos >= 4; })) ? "Final" : "Semifinal";
+  }
   for (var k = 0; k < ordem.length; k++) {
     var ts = confrontos.filter(function (c) {
       return ordem[k] === "Quartas" ? (c.fase === "Quartas" || c.fase === "Oitavas") : c.fase === ordem[k];
