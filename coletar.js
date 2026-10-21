@@ -53,7 +53,7 @@ async function extrairTabelaClassificacao(page, containerId) {
 // Abas do mata-mata do Torneio União: "TORNEIO UNIÃO - QUARTAS OURO" (e variações
 // com typo "UNIAO") ou, em alguns casos, só "FINAL RUBI" (sem hífen, sem prefixo).
 function ehMataMataUniao(texto) {
-  return /TORNEIO UNI[ÃA]O\s*-\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
+  return /TORNEIO UNI[ÃA]O\s*-?\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
 }
 
 function nomeFase(texto) {
