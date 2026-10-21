@@ -1796,19 +1796,34 @@ function AbaMataMata() {
 function AbaArtilharia() {
   const [campeonato, setCampeonato] = useState("paulista");
   const [categoria, setCategoria] = useState(CATEGORIAS[0]);
+  const [clube, setClube] = useState("");
+
+  const clubes = useMemo(() => {
+    const s = new Set();
+    ARTILHEIROS.forEach((j) => { if (j.campeonato === campeonato && j.categoria === categoria && j.clube) s.add(j.clube); });
+    return Array.from(s).sort((a, b) => nomeCurto(a).localeCompare(nomeCurto(b), "pt-BR"));
+  }, [campeonato, categoria]);
+  const clubeSel = clubes.indexOf(clube) >= 0 ? clube : "";
 
   const ranking = useMemo(() => {
     return ARTILHEIROS
-      .filter((j) => j.campeonato === campeonato && j.categoria === categoria)
+      .filter((j) => j.campeonato === campeonato && j.categoria === categoria && (!clubeSel || j.clube === clubeSel))
       .sort((a, b) => b.gols - a.gols)
       .slice(0, 100);
-  }, [campeonato, categoria]);
+  }, [campeonato, categoria, clubeSel]);
 
   return (
     <div>
       <div className="px-3 pt-3 pb-2 sticky top-[52px] z-10 bg-slate-900/95 backdrop-blur space-y-2">
         <FiltroCampeonato valor={campeonato} aoMudar={setCampeonato} />
         <FiltroCategoria valor={categoria} aoMudar={setCategoria} />
+        <div className="flex items-center gap-2">
+          <select value={clubeSel} onChange={(e) => setClube(e.target.value)} className="flex-1 bg-slate-800 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2">
+            <option value="">Todos os times</option>
+            {clubes.map((c) => <option key={c} value={c}>{nomeCurto(c)}</option>)}
+          </select>
+          {clubeSel ? <button onClick={() => setClube("")} className="text-[11px] px-2.5 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">Limpar</button> : null}
+        </div>
       </div>
       <div className="px-3 pt-1">
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md px-2 py-1 mb-3">
