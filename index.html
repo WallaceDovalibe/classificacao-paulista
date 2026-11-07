@@ -1287,7 +1287,7 @@ function LinhaNoChaveMM({ nome, vit, saldo, destaque, classif }) {
   );
 }
 
-var FEED_MM = { 5: [1, 4, "v"], 6: [2, 3, "v"], 7: [1, 4, "p"], 8: [2, 3, "p"], 9: [5, 6, "v"], 10: [5, 6, "p"], 11: [7, 8, "v"], 12: [7, 8, "p"] };
+var FEED_MM = { 5: [1, 4, "v"], 6: [2, 3, "v"], 7: [1, 4, "p"], 8: [2, 3, "p"], 9: [5, 6, "v"], 11: [5, 6, "p"], 10: [7, 8, "v"], 12: [7, 8, "p"] };
 
 var ROTA_MM = { 1: [5, 7], 2: [6, 8], 3: [6, 8], 4: [5, 7], 5: [9, 10], 6: [9, 10], 7: [11, 12], 8: [11, 12] };
 
@@ -1454,7 +1454,7 @@ function LinhaSubMM({ s }) {
 }
 
 function proximoMM(n) {
-  var m = { 1: ["J5 · Semifinal", "J7 · Semifinal"], 2: ["J6 · Semifinal", "J8 · Semifinal"], 3: ["J6 · Semifinal", "J8 · Semifinal"], 4: ["J5 · Semifinal", "J7 · Semifinal"], 5: ["J9 · Final", "J10 · Final"], 6: ["J9 · Final", "J10 · Final"], 7: ["J11 · Final", "J12 · Final"], 8: ["J11 · Final", "J12 · Final"] };
+  var m = { 1: ["J5 · Semifinal", "J7 · Semifinal"], 2: ["J6 · Semifinal", "J8 · Semifinal"], 3: ["J6 · Semifinal", "J8 · Semifinal"], 4: ["J5 · Semifinal", "J7 · Semifinal"], 5: ["J9 · Final", "J11 · Final"], 6: ["J9 · Final", "J11 · Final"], 7: ["J10 · Final", "J12 · Final"], 8: ["J10 · Final", "J12 · Final"] };
   return m[n] ? { v: m[n][0], p: m[n][1] } : null;
 }
 
