@@ -127,8 +127,9 @@ async function acharAbaPorTexto(page, textoParcial) {
   }, textoParcial);
 }
 
-(async () => {
+async function coletar() {
   const browser = await chromium.launch();
+  global.__browser = browser;
   const page = await browser.newPage();
   // As 4 chaves abaixo têm exatamente o formato que prototipo_fpfs_v9.html já
   // espera em RANKING_A3 / TORNEIO_UNIAO / JOGOS_UNIAO_TUPLAS / ARTILHEIROS_TUPLAS
@@ -305,10 +306,40 @@ async function acharAbaPorTexto(page, textoParcial) {
     totalRanking.forEach((j) => dados.artilheiros.push([categoria, "total", j.jogador, j.clube, j.gols]));
   }
 
+  // ---- Histórico de pontuação: guarda um snapshot só quando o ranking muda ----
+  try {
+    let ant = {};
+    try { ant = JSON.parse(fs.readFileSync("dados.json", "utf8")); } catch (e) {}
+    const hist = Array.isArray(ant.historico) ? ant.historico : [];
+    const snap = {};
+    dados.rankingGeral.forEach((r) => { snap[r[0]] = r[8]; });
+    const ultimo = hist.length ? hist[hist.length - 1] : null;
+    if (Object.keys(snap).length && (!ultimo || JSON.stringify(ultimo.s) !== JSON.stringify(snap))) {
+      hist.push({ t: dados.atualizadoEm, s: snap });
+    }
+    dados.historico = hist.slice(-300);
+  } catch (e) {
+    console.error("Aviso: histórico não atualizado:", e.message);
+  }
+
   fs.writeFileSync("dados.json", JSON.stringify(dados, null, 2));
   console.log("dados.json gerado com sucesso.");
   await browser.close();
-})().catch((err) => {
-  console.error("Erro na coleta:", err);
-  process.exit(1);
-});
+}
+
+// Tenta até 3 vezes (o site da FPFS às vezes cai por alguns minutos).
+(async () => {
+  const TENTATIVAS = 3;
+  for (let i = 1; i <= TENTATIVAS; i++) {
+    try {
+      await coletar();
+      try { require("child_process").spawnSync("node", ["testes.js"], { stdio: "inherit" }); } catch (e) {}
+      return;
+    } catch (err) {
+      console.error("Erro na coleta (tentativa " + i + "/" + TENTATIVAS + "):", err && err.message ? err.message : err);
+      try { if (global.__browser) await global.__browser.close(); } catch (e) {}
+      if (i === TENTATIVAS) { console.error("Coleta falhou em todas as tentativas."); process.exit(1); }
+      await new Promise((r) => setTimeout(r, i * 60000));
+    }
+  }
+})();
