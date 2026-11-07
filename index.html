@@ -62,7 +62,7 @@ function textoUltimaAtualizacao() {
   const horaStr = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const min = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
   const rel = min < 60 ? min + " min" : (min < 1440 ? Math.floor(min / 60) + "h" : Math.floor(min / 1440) + " dia(s)");
-  return `atualizado em ${dataStr} às ${horaStr} (há ${rel)`;
+  return `atualizado em ${dataStr} às ${horaStr} (há ${rel})`;
 }
 
 let TORNEIO_UNIAO = {}; // populado em runtime a partir de dados.json (ver iniciarApp no fim do arquivo)
