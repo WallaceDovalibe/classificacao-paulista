@@ -60,7 +60,9 @@ function textoUltimaAtualizacao() {
   const d = new Date(iso);
   const dataStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
   const horaStr = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  return `atualizado em ${dataStr} às ${horaStr}`;
+  const min = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+  const rel = min < 60 ? min + " min" : (min < 1440 ? Math.floor(min / 60) + "h" : Math.floor(min / 1440) + " dia(s)");
+  return `atualizado em ${dataStr} às ${horaStr} (há ${rel)`;
 }
 
 let TORNEIO_UNIAO = {}; // populado em runtime a partir de dados.json (ver iniciarApp no fim do arquivo)
@@ -447,7 +449,7 @@ function TabelaAcessoA2({ rows }) {
             return (
               <React.Fragment key={row.nome}>
                 <tr
-                  className={`border-t border-slate-100 hover:bg-slate-50 cursor-pointer relative ${podio}`}
+                  className={`border-t border-slate-100 hover:bg-slate-50 cursor-pointer relative ${podio}${classeClube(row.nome)}`}
                   onClick={() => setExpandido(aberto ? null : row.nome)}
                 >
                   <td className="text-center relative">
@@ -718,7 +720,9 @@ function CardProximo({ jogo }) {
         </div>
       </div>
       <div className="flex items-center gap-1.5 text-[10px] text-slate-400 border-t border-slate-700/60 pt-1.5">
-        <span>📍</span><span className="truncate">{jogo.local}</span>
+        <span>📍</span><span className="truncate flex-1">{jogo.local}</span>
+        <a href={linkMapa(jogo.local)} target="_blank" rel="noopener noreferrer" className="shrink-0 px-2 py-0.5 rounded-full border border-slate-600 text-slate-200 font-semibold">🗺️ Mapa</a>
+        <button type="button" onClick={function () { baixarICS(jogo); }} className="shrink-0 px-2 py-0.5 rounded-full border border-slate-600 text-slate-200 font-semibold">📆 Agenda</button>
       </div>
     </div>
   );
@@ -920,6 +924,8 @@ function AbaAcesso() {
         );
       })}
 
+      <HistoricoPontos />
+
       <p className="text-[10px] text-slate-500 mt-2">
         {rows.length} clubes no total nesta divisão · zona de acesso = 3 primeiros colocados.
       </p>
@@ -1034,7 +1040,7 @@ function AbaJogos() {
     const lista = chaves.map((grupo) => {
       const jogosDoGrupo = base.filter(
         (j) => j.grupo === grupo && j.status === status && (categoria === null || j.categoria === categoria) &&
-          (!equipeAtiva || j.mandante === equipeAtiva || j.visitante === equipeAtiva)
+          (!equipeAtiva || j.mandante === equipeAtiva || j.visitante === equipeAtiva) && jogoDoClube(j)
       );
       const ordenados = [...jogosDoGrupo].sort((a, b) => {
         const porData = status === "finalizado" ? b.data.localeCompare(a.data) : a.data.localeCompare(b.data);
@@ -1047,7 +1053,7 @@ function AbaJogos() {
       lista.sort((a, b) => (status === "finalizado" ? b.jogos[0].data.localeCompare(a.jogos[0].data) : a.jogos[0].data.localeCompare(b.jogos[0].data)));
     }
     return lista;
-  }, [camp, categoria, status, gruposSelecionados, equipeAtiva]);
+  }, [camp, categoria, status, gruposSelecionados, equipeAtiva, CLUBE_SEL]);
 
   function alternarGrupo(grupo) {
     setGruposFechados((prev) => ({ ...prev, [grupo]: !prev[grupo] }));
@@ -1586,6 +1592,7 @@ function CardConfrontoMM({ slot }) {
 }
 
 function AgendaMM({ jogos }) {
+  jogos = jogos.filter(jogoDoClube);
   var rotular = function (j) { return Object.assign({}, j, { categoria: j.categoria + " · " + j.fase + " " + j.serie }); };
   var proximos = jogos.filter(function (j) { return j.status === "agendado"; }).sort(function (a, b) { return dataHoraJogoMM(a) - dataHoraJogoMM(b); });
   var feitos = jogos.filter(function (j) { return j.status === "finalizado"; }).sort(function (a, b) { return dataHoraJogoMM(b) - dataHoraJogoMM(a); });
@@ -1818,14 +1825,14 @@ function AbaMataMata() {
 function AbaArtilharia() {
   const [campeonato, setCampeonato] = useState("paulista");
   const [categoria, setCategoria] = useState(CATEGORIAS[0]);
-  const [clube, setClube] = useState("");
+  const [clube, setClube] = useState(null);
 
   const clubes = useMemo(() => {
     const s = new Set();
     ARTILHEIROS.forEach((j) => { if (j.campeonato === campeonato && j.categoria === categoria && j.clube) s.add(j.clube); });
     return Array.from(s).sort((a, b) => nomeCurto(a).localeCompare(nomeCurto(b), "pt-BR"));
   }, [campeonato, categoria]);
-  const clubeSel = clubes.indexOf(clube) >= 0 ? clube : "";
+  const clubeSel = clube === null ? (clubes.find((c) => kMM(c) === CLUBE_SEL) || "") : (clubes.indexOf(clube) >= 0 ? clube : "");
 
   const ranking = useMemo(() => {
     return ARTILHEIROS
@@ -1865,6 +1872,127 @@ function AbaArtilharia() {
    6) APP SHELL
    ============================================================ */
 
+/* ---- Filtro global de clube (salvo no aparelho), agenda, aviso de atraso e histórico ---- */
+var CLUBE_SEL = "";
+function classeClube(nome) { return CLUBE_SEL && kMM(nome) === CLUBE_SEL ? " bg-emerald-100" : ""; }
+function jogoDoClube(j) { return !CLUBE_SEL || kMM(j.mandante) === CLUBE_SEL || kMM(j.visitante) === CLUBE_SEL; }
+function listaClubesGlobal() {
+  var m = new Map();
+  var add = function (n) { if (n && kMM(n) && !m.has(kMM(n))) m.set(kMM(n), nomeCurto(n)); };
+  RANKING_A3.forEach(function (r) { add(r[0]); });
+  JOGOS_UNIAO.forEach(function (j) { add(j.mandante); add(j.visitante); });
+  MATAMATA_UNIAO.forEach(function (j) { add(j.mandante); add(j.visitante); });
+  return Array.from(m.entries()).sort(function (a, b) { return a[1].localeCompare(b[1], "pt-BR"); });
+}
+
+function linkMapa(local) { return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(local || ""); }
+function baixarICS(jogo) {
+  var d = (jogo.data || "").replace(/-/g, "");
+  var hm = (jogo.hora || "00:00").replace(":", "").slice(0, 4);
+  var hh = parseInt(hm.slice(0, 2), 10) || 0;
+  var mm = hm.slice(2, 4) || "00";
+  var fim = String((hh + 1) % 24).padStart(2, "0") + mm;
+  var esc = function (s) { return String(s || "").replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n"); };
+  var ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//FPFS App//PT", "BEGIN:VEVENT",
+    "UID:" + jogo.id + "-" + d + hm + "@fpfs-app",
+    "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, ""),
+    "DTSTART:" + d + "T" + hm.slice(0, 2) + mm + "00",
+    "DTEND:" + d + "T" + fim + "00",
+    "SUMMARY:" + esc(nomeCurto(jogo.mandante) + " x " + nomeCurto(jogo.visitante) + " (" + jogo.categoria + ")"),
+    "LOCATION:" + esc(jogo.local),
+    "END:VEVENT", "END:VCALENDAR",
+  ].join("\r\n");
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  a.download = "jogo-" + d + ".ics";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function BannerAtraso() {
+  var iso = typeof window !== "undefined" ? window.__dadosAtualizadoEm : null;
+  if (!iso) return null;
+  var min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (!(min >= 150)) return null;
+  var txt = min >= 1440 ? Math.floor(min / 1440) + " dia(s)" : Math.floor(min / 60) + "h";
+  return (
+    <div className="mx-3 mt-3 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-md px-2 py-1.5">
+      ⚠️ Últimos dados coletados há {txt}. A coleta automática pode estar atrasada; resultados recentes podem ainda não aparecer.
+    </div>
+  );
+}
+
+function HistoricoPontos() {
+  var [aberto, setAberto] = useState(false);
+  var hist = (typeof window !== "undefined" && window.__historico) || [];
+  var ult = hist.length ? hist[hist.length - 1].s : {};
+  var nomes = Object.keys(ult).sort(function (a, b) { return ult[b] - ult[a]; });
+  var sel = nomes.slice(0, 5);
+  if (CLUBE_SEL) {
+    var meu = nomes.find(function (n) { return kMM(n) === CLUBE_SEL; });
+    if (meu && sel.indexOf(meu) < 0) sel.push(meu);
+  }
+  var cores = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#f87171"];
+  var W = 320, H = 170, pl = 34, pr = 8, pt = 8, pb = 18;
+  var corpo = null;
+  if (hist.length < 2) {
+    corpo = <p className="text-[11px] text-slate-400">O histórico começou a ser gravado agora. O gráfico aparece quando o ranking mudar pela primeira vez (cada mudança de pontuação vira um ponto).</p>;
+  } else {
+    var t0 = new Date(hist[0].t).getTime(), t1 = new Date(hist[hist.length - 1].t).getTime();
+    var vals = [];
+    hist.forEach(function (h) { sel.forEach(function (n) { if (h.s[n] != null) vals.push(h.s[n]); }); });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    if (!(mx > mn)) mx = mn + 1;
+    var X = function (t) { return pl + (t1 > t0 ? (t - t0) / (t1 - t0) : 0.5) * (W - pl - pr); };
+    var Y = function (v) { return pt + (1 - (v - mn) / (mx - mn)) * (H - pt - pb); };
+    var fmt = function (t) { var d = new Date(t); return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }); };
+    var caminhos = sel.map(function (n, k) {
+      var p = "", ultV = null;
+      hist.forEach(function (h) {
+        var v = h.s[n]; if (v == null) return;
+        var x = X(new Date(h.t).getTime());
+        p += ultV === null ? "M" + x + "," + Y(v) : "H" + x + " V" + Y(v);
+        ultV = v;
+      });
+      if (ultV !== null) p += "H" + X(t1);
+      return <path key={n} d={p} fill="none" stroke={cores[k % cores.length]} strokeWidth="2" strokeLinejoin="round" />;
+    });
+    corpo = (
+      <div>
+        <svg viewBox={"0 0 " + W + " " + H} className="w-full">
+          <line x1={pl} y1={pt} x2={pl} y2={H - pb} stroke="#475569" strokeWidth="1" />
+          <line x1={pl} y1={H - pb} x2={W - pr} y2={H - pb} stroke="#475569" strokeWidth="1" />
+          <text x={pl - 3} y={pt + 8} textAnchor="end" fontSize="9" fill="#94a3b8">{mx}</text>
+          <text x={pl - 3} y={H - pb} textAnchor="end" fontSize="9" fill="#94a3b8">{mn}</text>
+          <text x={pl} y={H - 4} fontSize="9" fill="#94a3b8">{fmt(t0)}</text>
+          <text x={W - pr} y={H - 4} textAnchor="end" fontSize="9" fill="#94a3b8">{fmt(t1)}</text>
+          {caminhos}
+        </svg>
+        <div className="mt-1 space-y-0.5">
+          {sel.map(function (n, k) {
+            return (
+              <div key={n} className="flex items-center gap-1.5 text-[10px] text-slate-300">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: cores[k % cores.length] }} />
+                <span className="truncate flex-1">{nomeCurto(n)}</span>
+                <span className="tabular-nums font-bold">{ult[n]}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-4 rounded-xl border border-slate-700 bg-slate-800/40 px-3 py-2.5">
+      <button type="button" onClick={function () { setAberto(!aberto); }} className="w-full flex items-center justify-between text-xs font-bold text-slate-200">
+        <span>📈 Evolução da pontuação total</span>
+        <span className="text-slate-500">{aberto ? "▲" : "▼"}</span>
+      </button>
+      {aberto ? <div className="mt-2">{corpo}</div> : null}
+    </div>
+  );
+}
+
 const TABS = [
   { id: "acesso", label: "Geral", icon: "🏆" },
   { id: "geral", label: "Classificação União", icon: "🥇" },
@@ -1875,6 +2003,10 @@ const TABS = [
 
 function App() {
   const [tab, setTab] = useState("acesso");
+  const [clube, setClubeState] = useState(function () { try { return localStorage.getItem("fpfs_clube") || ""; } catch (e) { return ""; } });
+  CLUBE_SEL = clube;
+  const escolherClube = function (v) { setClubeState(v); try { localStorage.setItem("fpfs_clube", v); } catch (e) {} };
+  const clubesLista = useMemo(listaClubesGlobal, []);
 
   return (
     <div className="min-h-screen bg-slate-900 pb-20 safe-bottom">
@@ -1889,12 +2021,14 @@ function App() {
             {tab === "artilharia" && "Artilharia"}
           </h1>
         </div>
-        <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-1 rounded-full border border-slate-700">
-          MVP V9
-        </span>
+        <select value={clube} onChange={function (e) { escolherClube(e.target.value); }} className="text-[10px] bg-slate-800 text-slate-200 px-2 py-1 rounded-full border border-slate-700 max-w-[140px]">
+          <option value="">Todos os times</option>
+          {clubesLista.map(function (c) { return <option key={c[0]} value={c[0]}>{c[1]}</option>; })}
+        </select>
       </header>
 
       <main>
+        <BannerAtraso />
         {tab === "acesso" && <AbaAcesso />}
         {tab === "geral" && <AbaGeralUniao />}
         {tab === "matamata" && <AbaMataMata />}
@@ -1955,6 +2089,7 @@ async function iniciarApp() {
     MATAMATA_UNIAO = MATAMATA_UNIAO.concat(previaMM(MATAMATA_UNIAO));
     ARTILHEIROS = construirArtilharia();
     window.__dadosAtualizadoEm = dados.atualizadoEm || null;
+    window.__historico = dados.historico || [];
   } catch (e) {
     console.error("Não consegui carregar dados.json — o app vai abrir sem dados. Detalhe:", e);
   }
