@@ -1248,9 +1248,26 @@ function montarChaveMM(confrontos, serie) {
       .sort(function (x, y) { return Math.min(x.posA || 999, x.posB || 999) - Math.min(y.posA || 999, y.posB || 999); });
   };
   porFase(["Oitavas", "Quartas"]).slice(0, 4).forEach(function (c, k) { slots[k].tie = c; });
-  porFase(["Semifinal"]).slice(0, 4).forEach(function (c, k) { slots[4 + k].tie = c; });
-  var idxFinais = [8, 10, 9, 11]; // J9 (1º/2º), J11 (3º/4º), J10 (5º/6º), J12 (7º/8º)
-  porFase(["Final"]).slice(0, 4).forEach(function (c, k) { slots[idxFinais[k]].tie = c; });
+  // Encaixe pelos classificados reais (vencedor/perdedor do jogo anterior); se ainda não der, cai na ordem de classificação.
+  var encaixar = function (pool, nums) {
+    var livres = pool.slice();
+    nums.forEach(function (n) {
+      var fd = FEED_MM[n];
+      var esp = [];
+      [fd[0], fd[1]].forEach(function (f) {
+        var tf = slots[f - 1].tie;
+        if (tf && tf.vencedor) esp.push(fd[2] === "v" ? tf.vencedor : tf.perdedor);
+      });
+      if (!esp.length) return;
+      var k = livres.findIndex(function (c) { return esp.indexOf(c.a) >= 0 || esp.indexOf(c.b) >= 0; });
+      if (k >= 0) { slots[n - 1].tie = livres[k]; livres.splice(k, 1); }
+    });
+    nums.forEach(function (n) {
+      if (!slots[n - 1].tie && livres.length) slots[n - 1].tie = livres.shift();
+    });
+  };
+  encaixar(porFase(["Semifinal"]).slice(0, 4), [5, 6, 7, 8]);
+  encaixar(porFase(["Final"]).slice(0, 4), [9, 11, 10, 12]); // J9 (1º/2º), J11 (3º/4º), J10 (5º/6º), J12 (7º/8º)
   return slots;
 }
 
@@ -1289,7 +1306,7 @@ function LinhaNoChaveMM({ nome, vit, saldo, destaque, classif }) {
 
 var FEED_MM = { 5: [1, 4, "v"], 6: [2, 3, "v"], 7: [1, 4, "p"], 8: [2, 3, "p"], 9: [5, 6, "v"], 11: [5, 6, "p"], 10: [7, 8, "v"], 12: [7, 8, "p"] };
 
-var ROTA_MM = { 1: [5, 7], 2: [6, 8], 3: [6, 8], 4: [5, 7], 5: [9, 10], 6: [9, 10], 7: [11, 12], 8: [11, 12] };
+var ROTA_MM = { 1: [5, 7], 2: [6, 8], 3: [6, 8], 4: [5, 7], 5: [9, 11], 6: [9, 11], 7: [10, 12], 8: [10, 12] };
 
 function RotaMM({ n, serie }) {
   var r = ROTA_MM[n];
