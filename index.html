@@ -2090,6 +2090,17 @@ async function iniciarApp() {
     ARTILHEIROS = construirArtilharia();
     window.__dadosAtualizadoEm = dados.atualizadoEm || null;
     window.__historico = dados.historico || [];
+    try {
+      const rb = await fetch("historico_base.json?" + Date.now());
+      if (rb.ok) {
+        const base = await rb.json();
+        if (Array.isArray(base) && base.length) {
+          const ult = base[base.length - 1];
+          const novos = (dados.historico || []).filter(function (h) { return h.t > ult.t && JSON.stringify(h.s) !== JSON.stringify(ult.s); });
+          window.__historico = base.concat(novos);
+        }
+      }
+    } catch (e) { console.error("Histórico base indisponível:", e); }
   } catch (e) {
     console.error("Não consegui carregar dados.json — o app vai abrir sem dados. Detalhe:", e);
   }
