@@ -1922,65 +1922,167 @@ function BannerAtraso() {
   );
 }
 
+function caminhoSuave(pts) {
+  // curva suave (spline cúbica monotônica): não "estoura" nos degraus de bônus
+  var n = pts.length;
+  if (n === 0) return "";
+  if (n === 1) return "M" + pts[0][0].toFixed(1) + "," + pts[0][1].toFixed(1);
+  var dx = [], m = [], t = [], i;
+  for (i = 0; i < n - 1; i++) { dx[i] = pts[i + 1][0] - pts[i][0]; m[i] = dx[i] ? (pts[i + 1][1] - pts[i][1]) / dx[i] : 0; }
+  t[0] = m[0]; t[n - 1] = m[n - 2];
+  for (i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (m[i - 1] + m[i]) / 2;
+  for (i = 0; i < n - 1; i++) {
+    if (m[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
+    var a = t[i] / m[i], b = t[i + 1] / m[i], s = a * a + b * b;
+    if (s > 9) { var k = 3 / Math.sqrt(s); t[i] = k * a * m[i]; t[i + 1] = k * b * m[i]; }
+  }
+  var d = "M" + pts[0][0].toFixed(1) + "," + pts[0][1].toFixed(1);
+  for (i = 0; i < n - 1; i++) {
+    var h = dx[i] / 3;
+    d += "C" + (pts[i][0] + h).toFixed(1) + "," + (pts[i][1] + t[i] * h).toFixed(1) + " " + (pts[i + 1][0] - h).toFixed(1) + "," + (pts[i + 1][1] - t[i + 1] * h).toFixed(1) + " " + pts[i + 1][0].toFixed(1) + "," + pts[i + 1][1].toFixed(1);
+  }
+  return d;
+}
+
 function HistoricoPontos() {
   var [aberto, setAberto] = useState(false);
-  var hist = (typeof window !== "undefined" && window.__historico) || [];
-  var ult = hist.length ? hist[hist.length - 1].s : {};
-  var nomes = Object.keys(ult).sort(function (a, b) { return ult[b] - ult[a]; });
-  var sel = nomes.slice(0, 5);
-  if (CLUBE_SEL) {
-    var meu = nomes.find(function (n) { return kMM(n) === CLUBE_SEL; });
-    if (meu && sel.indexOf(meu) < 0) sel.push(meu);
-  }
-  var cores = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#f87171"];
-  var W = 320, H = 170, pl = 34, pr = 8, pt = 8, pb = 18;
+  var [periodo, setPeriodo] = useState(0);
+  var [oculto, setOculto] = useState({});
+  var [hover, setHover] = useState(null);
+  var todo = (typeof window !== "undefined" && window.__historico) || [];
+  var cores = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#fb923c"];
+  var fmtNum = function (v) { return Math.round(v).toLocaleString("pt-BR"); };
+  var fmtData = function (t) { return new Date(t).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }); };
+  var fmtDataHora = function (t) { return fmtData(t) + " " + new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); };
+
   var corpo = null;
-  if (hist.length < 2) {
-    corpo = <p className="text-[11px] text-slate-400">O histórico começou a ser gravado agora. O gráfico aparece quando o ranking mudar pela primeira vez (cada mudança de pontuação vira um ponto).</p>;
-  } else {
-    var t0 = new Date(hist[0].t).getTime(), t1 = new Date(hist[hist.length - 1].t).getTime();
-    var vals = [];
-    hist.forEach(function (h) { sel.forEach(function (n) { if (h.s[n] != null) vals.push(h.s[n]); }); });
-    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-    if (!(mx > mn)) mx = mn + 1;
-    var X = function (t) { return pl + (t1 > t0 ? (t - t0) / (t1 - t0) : 0.5) * (W - pl - pr); };
-    var Y = function (v) { return pt + (1 - (v - mn) / (mx - mn)) * (H - pt - pb); };
-    var fmt = function (t) { var d = new Date(t); return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }); };
-    var caminhos = sel.map(function (n, k) {
-      var p = "", ultV = null;
-      hist.forEach(function (h) {
-        var v = h.s[n]; if (v == null) return;
-        var x = X(new Date(h.t).getTime());
-        p += ultV === null ? "M" + x + "," + Y(v) : "H" + x + " V" + Y(v);
-        ultV = v;
+  if (aberto) {
+    if (todo.length < 2) {
+      corpo = <p className="text-[11px] text-slate-400">O histórico começou a ser gravado agora. O gráfico aparece quando o ranking mudar pela primeira vez.</p>;
+    } else {
+      var tFim = new Date(todo[todo.length - 1].t).getTime();
+      var corte = periodo ? tFim - periodo * 86400000 : 0;
+      var hist = todo.filter(function (h) { return new Date(h.t).getTime() >= corte; });
+      if (periodo && hist.length < todo.length) {
+        var antes = todo[todo.length - hist.length - 1];
+        if (antes) hist = [antes].concat(hist);
+      }
+      var ult = todo[todo.length - 1].s;
+      var nomes = Object.keys(ult).sort(function (a, b) { return ult[b] - ult[a]; });
+      var sel = nomes.slice(0, 5);
+      if (CLUBE_SEL) {
+        var meu = nomes.find(function (n) { return kMM(n) === CLUBE_SEL; });
+        if (meu && sel.indexOf(meu) < 0) sel.push(meu);
+      }
+      var cor = {};
+      sel.forEach(function (n, k) { cor[n] = cores[k % cores.length]; });
+      var vis = sel.filter(function (n) { return !oculto[n]; });
+
+      var W = 360, H = 250, pl = 44, pr = 108, pt = 14, pb = 28;
+      var t0 = new Date(hist[0].t).getTime(), t1 = new Date(hist[hist.length - 1].t).getTime();
+      var vals = [];
+      hist.forEach(function (h) { vis.forEach(function (n) { if (h.s[n] != null) vals.push(h.s[n]); }); });
+      var lo = vals.length ? Math.min.apply(null, vals) : 0, hi = vals.length ? Math.max.apply(null, vals) : 1;
+      if (!(hi > lo)) { hi = lo + 10; }
+      var bruto = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log(bruto) / Math.LN10));
+      var passo = [1, 2, 2.5, 5, 10].map(function (x) { return x * mag; }).find(function (s) { return s >= bruto; });
+      lo = Math.floor(lo / passo) * passo; hi = Math.ceil(hi / passo) * passo;
+      var ticksY = []; for (var yv = lo; yv <= hi + 0.001; yv += passo) ticksY.push(yv);
+      var X = function (t) { return pl + (t1 > t0 ? (t - t0) / (t1 - t0) : 0.5) * (W - pl - pr); };
+      var Y = function (v) { return pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb); };
+      var ticksX = [0, 1, 2, 3, 4].map(function (k) { return t0 + (t1 - t0) * k / 4; });
+
+      var idx = hover === null ? hist.length - 1 : hover;
+      var ponto = hist[idx];
+      var mover = function (e) {
+        var r = e.currentTarget.getBoundingClientRect();
+        var vx = (e.clientX - r.left) / r.width * W;
+        var tt = t0 + (vx - pl) / (W - pl - pr) * (t1 - t0);
+        var best = 0, bd = Infinity;
+        hist.forEach(function (h, i) { var dd = Math.abs(new Date(h.t).getTime() - tt); if (dd < bd) { bd = dd; best = i; } });
+        setHover(best);
+      };
+
+      var linhas = vis.map(function (n) {
+        var pts = [];
+        hist.forEach(function (h) {
+          if (h.s[n] == null) return;
+          var x = X(new Date(h.t).getTime());
+          if (pts.length && Math.abs(pts[pts.length - 1][0] - x) < 0.01) pts.pop();
+          pts.push([x, Y(h.s[n])]);
+        });
+        return <path key={n} d={caminhoSuave(pts)} fill="none" stroke={cor[n]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />;
       });
-      if (ultV !== null) p += "H" + X(t1);
-      return <path key={n} d={p} fill="none" stroke={cores[k % cores.length]} strokeWidth="2" strokeLinejoin="round" />;
-    });
-    corpo = (
-      <div>
-        <svg viewBox={"0 0 " + W + " " + H} className="w-full">
-          <line x1={pl} y1={pt} x2={pl} y2={H - pb} stroke="#475569" strokeWidth="1" />
-          <line x1={pl} y1={H - pb} x2={W - pr} y2={H - pb} stroke="#475569" strokeWidth="1" />
-          <text x={pl - 3} y={pt + 8} textAnchor="end" fontSize="9" fill="#94a3b8">{mx}</text>
-          <text x={pl - 3} y={H - pb} textAnchor="end" fontSize="9" fill="#94a3b8">{mn}</text>
-          <text x={pl} y={H - 4} fontSize="9" fill="#94a3b8">{fmt(t0)}</text>
-          <text x={W - pr} y={H - 4} textAnchor="end" fontSize="9" fill="#94a3b8">{fmt(t1)}</text>
-          {caminhos}
-        </svg>
-        <div className="mt-1 space-y-0.5">
-          {sel.map(function (n, k) {
-            return (
-              <div key={n} className="flex items-center gap-1.5 text-[10px] text-slate-300">
-                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: cores[k % cores.length] }} />
-                <span className="truncate flex-1">{nomeCurto(n)}</span>
-                <span className="tabular-nums font-bold">{ult[n]}</span>
-              </div>
-            );
-          })}
+
+      // rótulos no fim das linhas, sem sobreposição
+      var fim = vis.map(function (n) { return { n: n, y: Y(ult[n] != null ? ult[n] : lo) }; }).sort(function (a, b) { return a.y - b.y; });
+      var ys = fim.map(function (f) { return f.y; });
+      for (var q = 1; q < ys.length; q++) { if (ys[q] - ys[q - 1] < 12) ys[q] = ys[q - 1] + 12; }
+      var sobra = ys.length ? ys[ys.length - 1] - (H - pb) : 0;
+      if (sobra > 0) { for (var z = 0; z < ys.length; z++) ys[z] -= sobra; }
+      var rotulos = fim.map(function (f, k) {
+        var nm = nomeCurto(f.n); if (nm.length > 14) nm = nm.slice(0, 13) + "…";
+        return (
+          <g key={f.n}>
+            <circle cx={X(t1)} cy={f.y} r="3" fill={cor[f.n]} stroke="#0f172a" strokeWidth="1.5" />
+            <text x={W - pr + 8} y={ys[k] + 3} fontSize="9" fill={cor[f.n]} fontWeight="700">{nm} <tspan fill="#e2e8f0">{fmtNum(ult[f.n])}</tspan></text>
+          </g>
+        );
+      });
+
+      var linhaHover = hover !== null ? (
+        <g>
+          <line x1={X(new Date(ponto.t).getTime())} y1={pt} x2={X(new Date(ponto.t).getTime())} y2={H - pb} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3 3" />
+          {vis.map(function (n) { return ponto.s[n] != null ? <circle key={n} cx={X(new Date(ponto.t).getTime())} cy={Y(ponto.s[n])} r="3.5" fill={cor[n]} stroke="#0f172a" strokeWidth="1.5" /> : null; })}
+        </g>
+      ) : null;
+
+      var leitura = vis.filter(function (n) { return ponto.s[n] != null; }).sort(function (a, b) { return ponto.s[b] - ponto.s[a]; });
+
+      corpo = (
+        <div>
+          <div className="flex items-center gap-1.5 mb-2">
+            {[[0, "Tudo"], [14, "14 dias"], [7, "7 dias"]].map(function (p) {
+              return <button key={p[0]} type="button" onClick={function () { setPeriodo(p[0]); setHover(null); }} className={"text-[10px] font-semibold px-2.5 py-1 rounded-full border " + (periodo === p[0] ? "bg-emerald-500 text-white border-emerald-500" : "text-slate-300 border-slate-600")}>{p[1]}</button>;
+            })}
+          </div>
+          <div className="rounded-lg bg-slate-900/60 border border-slate-700/60 px-2 py-1.5 mb-1.5">
+            <div className="text-[10px] text-slate-400 mb-1">{hover === null ? "Agora · " : ""}{fmtDataHora(ponto.t)}</div>
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+              {leitura.map(function (n) {
+                return <span key={n} className="text-[10px] text-slate-300"><span style={{ color: cor[n] }} className="font-bold">{nomeCurto(n)}</span> <b className="text-white tabular-nums">{fmtNum(ponto.s[n])}</b></span>;
+              })}
+            </div>
+          </div>
+          <svg viewBox={"0 0 " + W + " " + H} className="w-full select-none" style={{ touchAction: "pan-y" }} onPointerMove={mover} onPointerDown={mover} onPointerLeave={function () { setHover(null); }}>
+            {ticksY.map(function (v) {
+              return (
+                <g key={v}>
+                  <line x1={pl} y1={Y(v)} x2={W - pr} y2={Y(v)} stroke="#334155" strokeWidth="0.7" strokeDasharray="2 3" />
+                  <text x={pl - 5} y={Y(v) + 3} textAnchor="end" fontSize="9" fill="#94a3b8">{fmtNum(v)}</text>
+                </g>
+              );
+            })}
+            {ticksX.map(function (t, k) {
+              return <text key={k} x={X(t)} y={H - 10} textAnchor={k === 0 ? "start" : (k === 4 ? "end" : "middle")} fontSize="9" fill="#94a3b8">{fmtData(t)}</text>;
+            })}
+            {linhas}
+            {linhaHover}
+            {rotulos}
+          </svg>
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+            {sel.map(function (n) {
+              return (
+                <button key={n} type="button" onClick={function () { var o = Object.assign({}, oculto); o[n] = !o[n]; setOculto(o); }} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border border-slate-600 text-slate-200" style={{ opacity: oculto[n] ? 0.35 : 1 }}>
+                  <span className="w-2 h-2 rounded-full" style={{ background: cor[n] }} />{nomeCurto(n)}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-slate-500 mt-1.5">Toque ou passe o dedo no gráfico para ver os valores de cada data. Toque no nome do time para esconder ou mostrar a linha.</p>
         </div>
-      </div>
-    );
+      );
+    }
   }
   return (
     <div className="mt-4 rounded-xl border border-slate-700 bg-slate-800/40 px-3 py-2.5">
@@ -1992,6 +2094,7 @@ function HistoricoPontos() {
     </div>
   );
 }
+
 
 const TABS = [
   { id: "acesso", label: "Geral", icon: "🏆" },
