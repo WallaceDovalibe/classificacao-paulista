@@ -53,7 +53,7 @@ async function extrairTabelaClassificacao(page, containerId) {
 // Abas do mata-mata do Torneio União: "TORNEIO UNIÃO - QUARTAS OURO" (e variações
 // com typo "UNIAO") ou, em alguns casos, só "FINAL RUBI" (sem hífen, sem prefixo).
 function ehMataMataUniao(texto) {
-  return /TORNEIO UNI[ÃA]O\s*-?\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
+  return /TORNEIO UNI[ÃA]O\s*-?\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto) || /^FINAIS\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
 }
 
 function nomeFase(texto) {
@@ -225,7 +225,7 @@ async function coletar() {
     );
     for (const aba of abasMata) {
       if (!ehMataMataUniao(aba.texto)) continue;
-      const m = aba.texto.match(/(OITAVAS|QUARTAS|SEMI\w*|FINAL)\w*(?:\s+DE\s+FINAIS?)?\s*-?\s*(OURO|PRATA|BRONZE|BRONE|RUBI)/i);
+      const m = aba.texto.match(/(OITAVAS|QUARTAS|SEMI\w*|FINAIS|FINAL)\w*(?:\s+DE\s+FINAIS?)?\s*-?\s*(OURO|PRATA|BRONZE|BRONE|RUBI)/i);
       if (!m) continue;
       const f = m[1].toUpperCase();
       const fase = f.startsWith("OITAVAS") ? "Oitavas" : f.startsWith("QUARTAS") ? "Quartas" : f.startsWith("SEMI") ? "Semifinal" : "Final";
