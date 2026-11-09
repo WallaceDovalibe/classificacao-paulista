@@ -1208,6 +1208,8 @@ function construirConfrontosMM() {
     var a = c.par[0];
     var b = c.par[1];
     if ((pos[kMM(b)] || 999) < (pos[kMM(a)] || 999)) { var tmp = a; a = b; b = tmp; }
+    var cntSub = CATEGORIAS.map(function (cat) { return c.jogos.filter(function (j) { return j.categoria === cat; }).length; });
+    var unico = c.fase === "Final" && cntSub.every(function (n) { return n === 1; });
     var porSub = CATEGORIAS.map(function (cat) {
       var jogos = c.jogos.filter(function (j) { return j.categoria === cat; }).sort(function (x, y) { return dataHoraJogoMM(x) - dataHoraJogoMM(y); });
       var ga = 0, gb = 0, jogados = 0, vA = 0, vB = 0, eg = 0;
@@ -1219,10 +1221,10 @@ function construirConfrontosMM() {
         ga += gjA; gb += gjB;
         if (gjA > gjB) vA++; else if (gjB > gjA) vB++; else eg++;
       });
-      var decidido = jogados >= 2;
+      var decidido = jogados >= (unico ? 1 : 2);
       var vencedor = decidido ? (ga > gb ? a : (gb > ga ? b : null)) : null;
       var lidera = jogados >= 1 ? (ga > gb ? a : (gb > ga ? b : null)) : null;
-      return { categoria: cat, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor, lidera: lidera, vA: vA, vB: vB, eg: eg };
+      return { categoria: cat, unico: unico, ida: jogos[0] || null, volta: jogos[1] || null, ga: ga, gb: gb, jogados: jogados, decidido: decidido, vencedor: vencedor, lidera: lidera, vA: vA, vB: vB, eg: eg };
     });
     var vitA = porSub.reduce(function (t, s) { return t + s.vA; }, 0);
     var vitB = porSub.reduce(function (t, s) { return t + s.vB; }, 0);
@@ -1236,7 +1238,7 @@ function construirConfrontosMM() {
     return {
       serie: c.serie, fase: c.fase, a: a, b: b,
       posA: pos[kMM(a)], posB: pos[kMM(b)], totalA: total[kMM(a)], totalB: total[kMM(b)], ptsA: pts[kMM(a)], ptsB: pts[kMM(b)],
-      porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos, jogosFeitos: jogosFeitos,
+      unico: unico, totalJogos: unico ? 4 : 8, porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos, jogosFeitos: jogosFeitos,
       emp: empJogos,
       vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
     };
@@ -1464,12 +1466,12 @@ function LinhaSubMM({ s }) {
         <span className="text-[7px] uppercase tracking-wider text-slate-500 font-bold leading-none">sub</span>
         <span className="text-sm font-black text-slate-200 leading-tight">{s.categoria.replace("Sub-", "")}</span>
       </div>
-      <PernaMM j={s.ida} rotulo="Ida" />
-      <PernaMM j={s.volta} rotulo="Volta" />
+      <PernaMM j={s.ida} rotulo={s.unico ? "Jogo único" : "Ida"} />
+      {s.unico ? null : <PernaMM j={s.volta} rotulo="Volta" />}
       <div className={"w-12 shrink-0 rounded-lg text-center py-1 border " + (s.decidido ? "bg-emerald-500/15 border-emerald-500/30" : "bg-slate-800/50 border-slate-700/50")}>
         {s.vencedor
           ? <Escudo nome={s.vencedor} size="w-3.5 h-3.5 block mx-auto" />
-          : <div className="text-[8px] uppercase tracking-wider text-slate-500 font-bold leading-snug">{s.decidido ? "empate" : "agreg."}</div>}
+          : <div className="text-[8px] uppercase tracking-wider text-slate-500 font-bold leading-snug">{s.decidido ? "empate" : (s.unico ? "a jogar" : "agreg.")}</div>}
         <div className="text-xs font-extrabold text-white tabular-nums mt-0.5">{s.jogados > 0 ? (s.ga + "–" + s.gb) : "–"}</div>
       </div>
     </div>
@@ -1503,7 +1505,7 @@ function ClassificadoMM({ c, n }) {
         <span className="text-xl">{n >= 9 ? "🏆" : "✅"}</span>
         <div className="flex-1 min-w-0">
           <div className="text-[11px] font-black uppercase tracking-wide text-emerald-300 truncate">{nomeCurto(venc)} {n >= 9 ? "venceu a disputa" : "classificado"}</div>
-          <div className="text-[10px] text-slate-300">{vitV} × {vitP} em vitórias nos 8 jogos{porSaldo ? " · desempate no saldo de gols (" + (saldoV > 0 ? "+" : "") + saldoV + ")" : ""}</div>
+          <div className="text-[10px] text-slate-300">{vitV} × {vitP} em vitórias nos {c.totalJogos || 8} jogos{porSaldo ? " · desempate no saldo de gols (" + (saldoV > 0 ? "+" : "") + saldoV + ")" : ""}</div>
           {prox ? <div className="text-[10px] text-emerald-200/80 mt-0.5">Segue para {prox.v}{perd ? " · " + nomeCurto(perd) + " vai para " + prox.p : ""}</div> : null}
         </div>
         <button type="button" onClick={function () { setBurst(Date.now()); }} className="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-400 text-slate-950 active:scale-95">🎉 Comemorar</button>
@@ -1536,9 +1538,10 @@ function CardConfrontoMM({ slot }) {
       <div className="px-3 pt-3 pb-2.5">
         <div className="flex items-center justify-between text-[10px] mb-2.5">
           <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.fase} · {c.serie}</span>
-          <span className="text-slate-400">{c.jogosFeitos}/8 jogos</span>
+          <span className="text-slate-400">{c.jogosFeitos}/{c.totalJogos || 8} jogos</span>
         </div>
         {disputaMM(slot.n, c.serie) ? <div className={"text-center text-[11px] font-bold mb-2 " + st.text}>{disputaMM(slot.n, c.serie)}</div> : null}
+        {c.unico ? <div className="text-center text-[10px] font-bold text-amber-300 mb-2">⚡ Jogo único · 1 jogo por categoria (4 jogos no total)</div> : null}
         {c.vencedor ? <ClassificadoMM c={c} n={slot.n} /> : null}
         <div className="flex items-center gap-2">
           <LadoClubeMM nome={c.a} pos={c.posA} cor="bg-sky-500/15 text-sky-300 border-sky-400/30" estado={c.vencedor ? (c.vencedor === c.a ? "class" : "elim") : null} />
@@ -1557,7 +1560,7 @@ function CardConfrontoMM({ slot }) {
             </div>
             <div className="mt-1 text-[9px] font-semibold tabular-nums flex items-center justify-center gap-2">
               <span className="text-amber-300">{c.emp} {c.emp === 1 ? "empate" : "empates"}</span>
-              <span className="text-slate-500">{8 - c.jogosFeitos} a jogar</span>
+              <span className="text-slate-500">{(c.totalJogos || 8) - c.jogosFeitos} a jogar</span>
             </div>
             <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[11px] font-extrabold tabular-nums">
               <span className={corSal(sal)}>{fs(sal)}</span>
@@ -1665,7 +1668,7 @@ function disputaMM(n, serie) {
     return "Disputa do " + (b + semi[n][0]) + "º ao " + (b + semi[n][1]) + "º lugar";
   }
   var p = posFinalMM(n, serie);
-  return p ? "Disputa do " + p + " lugar" : null;
+  return p ? "Disputa do " + p + " lugar" + (n === 9 ? " · jogo único" : "") : null;
 }
 
 function CardADefinirMM({ slot, serie, fase }) {
@@ -1731,7 +1734,7 @@ function AbaMataMata() {
         <div className="absolute -right-3 -top-3 text-7xl opacity-10 select-none">⚔️</div>
         <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Torneio União · Mata-mata</div>
         <h2 className="text-lg font-black text-white leading-tight mt-0.5">Ida e volta nos 4 subs</h2>
-        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas pelo Geral: 1º×8º, 2º×7º, 3º×6º e 4º×5º. Passa quem somar mais vitórias nos 8 jogos (ida e volta dos 4 subs); se empatar, decide o saldo de gols.</p>
+        <p className="text-[11px] text-slate-300 mt-1 mb-3">Todos jogam até o fim e cada confronto decide uma posição da série. Quartas pelo Geral: 1º×8º, 2º×7º, 3º×6º e 4º×5º. Passa quem somar mais vitórias nos 8 jogos (ida e volta dos 4 subs); se empatar, decide o saldo de gols. A final do 1º/2º é em jogo único (1 jogo em cada sub, 4 no total).</p>
         {emAndamento.length > 0 ? (
           <div className="rounded-lg bg-rose-500/15 border border-rose-400/30 px-2.5 py-2 mb-2.5">
             <div className="text-xs font-bold text-rose-300">🔴 Bola rolando: {emAndamento.length} {emAndamento.length === 1 ? "jogo em andamento" : "jogos em andamento"}</div>
@@ -1813,7 +1816,7 @@ function AbaMataMata() {
               : <CardADefinirMM key={n} slot={s} serie={serie} fase={faseSel} />;
           })}
 
-          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem somar mais vitórias em todos os jogos do confronto (4 subs, ida e volta); empate nas vitórias, decide o saldo de gols somado.</p>
+          <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem somar mais vitórias em todos os jogos do confronto (4 subs, ida e volta); empate nas vitórias, decide o saldo de gols somado. A final do 1º/2º é jogo único em cada sub.</p>
         </div>
       ) : (
         <AgendaMM jogos={jogosSerie} />
