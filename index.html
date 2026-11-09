@@ -1209,7 +1209,7 @@ function construirConfrontosMM() {
     var b = c.par[1];
     if ((pos[kMM(b)] || 999) < (pos[kMM(a)] || 999)) { var tmp = a; a = b; b = tmp; }
     var cntSub = CATEGORIAS.map(function (cat) { return c.jogos.filter(function (j) { return j.categoria === cat; }).length; });
-    var unico = c.fase === "Final" && cntSub.every(function (n) { return n === 1; });
+    var unico = c.fase === "Final" && (c.serie === "Rubi" ? (cntSub.every(function (n) { return n <= 1; }) && cntSub.some(function (n) { return n === 1; })) : cntSub.every(function (n) { return n === 1; }));
     var porSub = CATEGORIAS.map(function (cat) {
       var jogos = c.jogos.filter(function (j) { return j.categoria === cat; }).sort(function (x, y) { return dataHoraJogoMM(x) - dataHoraJogoMM(y); });
       var ga = 0, gb = 0, jogados = 0, vA = 0, vB = 0, eg = 0;
@@ -1233,12 +1233,13 @@ function construirConfrontosMM() {
     var decididos = porSub.filter(function (s) { return s.decidido; }).length;
     var jogosFeitos = porSub.reduce(function (t, s) { return t + s.jogados; }, 0);
     var empJogos = porSub.reduce(function (t, s) { return t + s.eg; }, 0);
+    var precisa = c.serie === "Rubi" ? Math.max(1, cntSub.filter(function (n) { return n > 0; }).length) : 4;
     var lider = null;
-    if (decididos === 4) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
+    if (decididos === precisa) lider = vitA > vitB ? a : (vitB > vitA ? b : (golsA > golsB ? a : (golsB > golsA ? b : null)));
     return {
       serie: c.serie, fase: c.fase, a: a, b: b,
       posA: pos[kMM(a)], posB: pos[kMM(b)], totalA: total[kMM(a)], totalB: total[kMM(b)], ptsA: pts[kMM(a)], ptsB: pts[kMM(b)],
-      unico: unico, totalJogos: unico ? 4 : 8, porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos, jogosFeitos: jogosFeitos,
+      unico: unico, totalJogos: c.serie === "Rubi" ? c.jogos.length : (unico ? 4 : 8), porSub: porSub, vitA: vitA, vitB: vitB, golsA: golsA, golsB: golsB, decididos: decididos, jogosFeitos: jogosFeitos,
       emp: empJogos,
       vencedor: lider, perdedor: lider ? (lider === a ? b : a) : null,
     };
@@ -1505,7 +1506,7 @@ function ClassificadoMM({ c, n }) {
         <span className="text-xl">{n >= 9 ? "🏆" : "✅"}</span>
         <div className="flex-1 min-w-0">
           <div className="text-[11px] font-black uppercase tracking-wide text-emerald-300 truncate">{nomeCurto(venc)} {n >= 9 ? "venceu a disputa" : "classificado"}</div>
-          <div className="text-[10px] text-slate-300">{vitV} × {vitP} em vitórias nos {c.totalJogos || 8} jogos{porSaldo ? " · desempate no saldo de gols (" + (saldoV > 0 ? "+" : "") + saldoV + ")" : ""}</div>
+          <div className="text-[10px] text-slate-300">{vitV} × {vitP} em vitórias {c.totalJogos === 1 ? "no" : "nos"} {c.totalJogos || 8} {c.totalJogos === 1 ? "jogo" : "jogos"}{porSaldo ? " · desempate no saldo de gols (" + (saldoV > 0 ? "+" : "") + saldoV + ")" : ""}</div>
           {prox ? <div className="text-[10px] text-emerald-200/80 mt-0.5">Segue para {prox.v}{perd ? " · " + nomeCurto(perd) + " vai para " + prox.p : ""}</div> : null}
         </div>
         <button type="button" onClick={function () { setBurst(Date.now()); }} className="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-400 text-slate-950 active:scale-95">🎉 Comemorar</button>
@@ -1537,12 +1538,12 @@ function CardConfrontoMM({ slot }) {
     <div className={"rounded-2xl border bg-gradient-to-b mb-3 overflow-hidden " + st.ring + " " + st.grad}>
       <div className="px-3 pt-3 pb-2.5">
         <div className="flex items-center justify-between text-[10px] mb-2.5">
-          <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {c.fase} · {c.serie}</span>
+          <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} {slot.n ? "J" + slot.n + " · " : ""}{c.fase} · {c.serie}</span>
           <span className="text-slate-400">{c.jogosFeitos}/{c.totalJogos || 8} jogos</span>
         </div>
         {disputaMM(slot.n, c.serie) ? <div className={"text-center text-[11px] font-bold mb-2 " + st.text}>{disputaMM(slot.n, c.serie)}</div> : null}
-        {c.unico ? <div className="text-center text-[10px] font-bold text-amber-300 mb-2">⚡ Jogo único · 1 jogo por categoria (4 jogos no total)</div> : null}
-        {c.vencedor ? <ClassificadoMM c={c} n={slot.n} /> : null}
+        {c.unico ? <div className="text-center text-[10px] font-bold text-amber-300 mb-2">⚡ Jogo único{c.totalJogos === 4 ? " · 1 jogo por categoria (4 jogos no total)" : ""}</div> : null}
+        {c.vencedor ? <ClassificadoMM c={c} n={slot.n || (c.fase === "Final" ? 9 : 0)} /> : null}
         <div className="flex items-center gap-2">
           <LadoClubeMM nome={c.a} pos={c.posA} cor="bg-sky-500/15 text-sky-300 border-sky-400/30" estado={c.vencedor ? (c.vencedor === c.a ? "class" : "elim") : null} />
           <div className="text-center shrink-0 px-1">
@@ -1582,7 +1583,7 @@ function CardConfrontoMM({ slot }) {
         </div>
       </div>
       <div className="bg-slate-950/40 border-t border-white/5 px-2.5 py-2.5 space-y-1.5">
-        {c.porSub.map(function (s) { return <LinhaSubMM key={s.categoria} s={s} />; })}
+        {c.porSub.filter(function (s) { return c.serie !== "Rubi" || s.ida || s.volta; }).map(function (s) { return <LinhaSubMM key={s.categoria} s={s} />; })}
         {(c.golsA + c.golsB) > 0 ? (
           <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400">
             <span>Gols nos 4 subs</span>
@@ -1715,6 +1716,29 @@ function CardADefinirMM({ slot, serie, fase, slots }) {
   );
 }
 
+function RubiMM({ confrontos }) {
+  var ties = confrontos.filter(function (c) { return c.serie === "Rubi"; });
+  var fases = [["Quartas", "Quartas de final"], ["Semifinal", "Semifinais"], ["Final", "Final"]];
+  return (
+    <div>
+      <div className="rounded-lg bg-slate-800/60 border border-slate-700 px-3 py-2 mb-3 text-[11px] text-slate-300">
+        💎 A chave Rubi não segue o chaveamento padrão das outras séries. Aqui aparecem exatamente os confrontos que a FPFS publicou, por fase, sem posições nem cruzamentos presumidos.
+      </div>
+      {fases.map(function (f) {
+        var lista = ties.filter(function (c) { return c.fase === f[0] || (f[0] === "Quartas" && c.fase === "Oitavas"); });
+        if (!lista.length) return null;
+        return (
+          <div key={f[0]} className="mb-2">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">{f[1]} · {lista.length} {lista.length === 1 ? "confronto" : "confrontos"}</div>
+            {lista.map(function (c) { return <CardConfrontoMM key={f[0] + c.a + c.b} slot={{ n: 0, tie: c, serie: "Rubi" }} />; })}
+          </div>
+        );
+      })}
+      {ties.length === 0 ? <p className="text-center text-xs text-slate-500 py-6">A FPFS ainda não publicou confrontos do Rubi.</p> : null}
+    </div>
+  );
+}
+
 function AbaMataMata() {
   const [serie, setSerie] = useState("Ouro");
   const [visao, setVisao] = useState("confrontos");
@@ -1802,6 +1826,8 @@ function AbaMataMata() {
 
       {MATAMATA_UNIAO.length === 0 ? (
         <p className="text-center text-xs text-slate-500 py-8">Ainda não há jogos de mata-mata nos dados. Eles chegam na próxima atualização.</p>
+      ) : visao === "confrontos" && serie === "Rubi" ? (
+        <RubiMM confrontos={confrontos} />
       ) : visao === "confrontos" ? (
         <div>
           <ChaveMM slots={slots} />
