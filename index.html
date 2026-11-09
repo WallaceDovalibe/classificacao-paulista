@@ -1671,28 +1671,44 @@ function disputaMM(n, serie) {
   return p ? "Disputa do " + p + " lugar" + (n === 9 ? " · jogo único" : "") : null;
 }
 
-function CardADefinirMM({ slot, serie, fase }) {
+function CardADefinirMM({ slot, serie, fase, slots }) {
   var st = SERIE_MM_STYLE[serie] || SERIE_MM_STYLE.Ouro;
+  var fd = FEED_MM[slot.n];
+  var prev = [null, null];
+  if (fd && slots) {
+    [fd[0], fd[1]].forEach(function (f, k) {
+      var tf = slots[f - 1] && slots[f - 1].tie;
+      prev[k] = tf && tf.vencedor ? (fd[2] === "v" ? tf.vencedor : tf.perdedor) : null;
+    });
+  }
+  var definido = !!(prev[0] && prev[1]);
+  var lado = function (nome) {
+    return nome
+      ? <div className="w-12 h-12 shrink-0 flex items-center justify-center"><Escudo nome={nome} size="w-12 h-12" /></div>
+      : <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>;
+  };
   return (
     <div className={"rounded-2xl border border-dashed bg-slate-800/30 mb-3 overflow-hidden " + st.ring}>
       <div className="px-3 pt-3 pb-2.5">
         <div className="flex items-center justify-between text-[10px] mb-2.5">
           <span className={"font-bold uppercase tracking-wider " + st.text}>{st.icon} J{slot.n} · {fase.nome} · {serie}</span>
-          <span className="text-slate-500">0/4 subs decididos</span>
+          <span className="text-slate-500">{definido ? "aguardando os jogos" : "0/4 subs decididos"}</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>
+          {lado(prev[0])}
           <div className="flex-1 text-center">
-            <div className="text-sm font-black text-slate-300">Confronto a definir</div>
+            {definido
+              ? <div className="text-sm font-black text-white">{nomeCurto(prev[0])} <span className="text-slate-500">×</span> {nomeCurto(prev[1])}</div>
+              : <div className="text-sm font-black text-slate-300">Confronto a definir</div>}
             {disputaMM(slot.n, serie) ? <div className={"text-[11px] font-bold mt-0.5 " + st.text}>{disputaMM(slot.n, serie)}</div> : null}
-            <div className="text-[10px] text-slate-500 mt-0.5">{fase.espera}</div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{definido ? "Confronto já definido pelas semifinais · aguardando a FPFS publicar datas e horários" : fase.espera}</div>
           </div>
-          <div className="w-12 h-12 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-lg font-black shrink-0">?</div>
+          {lado(prev[1])}
         </div>
       </div>
       <div className="bg-slate-950/30 border-t border-white/5 px-2.5 py-2.5 space-y-1.5 opacity-60">
         {CATEGORIAS.map(function (cat) {
-          return <LinhaSubMM key={cat} s={{ categoria: cat, ida: null, volta: null, ga: 0, gb: 0, jogados: 0, decidido: false, vencedor: null }} />;
+          return <LinhaSubMM key={cat} s={{ categoria: cat, unico: slot.n === 9, ida: null, volta: null, ga: 0, gb: 0, jogados: 0, decidido: false, vencedor: null }} />;
         })}
       </div>
     </div>
@@ -1813,7 +1829,7 @@ function AbaMataMata() {
             var s = slots[n - 1];
             return s.tie
               ? <CardConfrontoMM key={n} slot={s} />
-              : <CardADefinirMM key={n} slot={s} serie={serie} fase={faseSel} />;
+              : <CardADefinirMM key={n} slot={s} serie={serie} fase={faseSel} slots={slots} />;
           })}
 
           <p className="text-[10px] text-slate-500 text-center px-4 pb-2">Passa quem somar mais vitórias em todos os jogos do confronto (4 subs, ida e volta); empate nas vitórias, decide o saldo de gols somado. A final do 1º/2º é jogo único em cada sub.</p>
