@@ -127,6 +127,12 @@ async function acharAbaPorTexto(page, textoParcial) {
   }, textoParcial);
 }
 
+// Abre a página tolerando site lento: espera o HTML (até 90 s) e só tenta "rede ociosa" por até 20 s.
+async function irPara(page, url) {
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
+  await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(function () {});
+}
+
 async function coletar() {
   const browser = await chromium.launch();
   global.__browser = browser;
@@ -154,7 +160,7 @@ async function coletar() {
   // de cada time; a linha de detalhe tem só 1 coluna, com a tabela aninhada
   // dentro dela).
   console.log("Coletando ranking geral (Acesso)...");
-  await page.goto("https://eventos.admfutsal.com.br/ranking?grupo-cat=1&divisao=10", { waitUntil: "networkidle" });
+  await irPara(page, "https://eventos.admfutsal.com.br/ranking?grupo-cat=1&divisao=10");
   const rankingBruto = await page.$$eval("table", (tabelas) => {
     const t = tabelas.find((tb) => tb.classList.contains("table") && !tb.classList.contains("table-sm"));
     if (!t) return [];
@@ -194,7 +200,7 @@ async function coletar() {
     dados.torneioUniao[categoria] = {};
 
     // Classificação (mesma página base, todas as abas já vêm no HTML)
-    await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}`, { waitUntil: "networkidle" });
+    await irPara(page, `https://eventos.admfutsal.com.br/evento/${eventoId}`);
     for (const grupo of GRUPOS) {
       const containerId = await acharAbaPorTexto(page, `TORNEIO UNIÃO - ${grupo.toUpperCase()}`);
       if (!containerId) { console.warn(`  aviso: aba "${grupo}" não encontrada em ${categoria}`); continue; }
@@ -203,7 +209,7 @@ async function coletar() {
     }
 
     // Jogos (página /jogos, mesmo mecanismo de abas)
-    await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}/jogos`, { waitUntil: "networkidle" });
+    await irPara(page, `https://eventos.admfutsal.com.br/evento/${eventoId}/jogos`);
     for (const grupo of GRUPOS) {
       const containerId = await acharAbaPorTexto(page, `TORNEIO UNIÃO - ${grupo.toUpperCase()}`);
       if (!containerId) continue;
@@ -258,7 +264,7 @@ async function coletar() {
     }
 
     // Artilharia: "Geral" (Paulista+União já somados pela FPFS) + cada grupo da União
-    await page.goto(`https://eventos.admfutsal.com.br/evento/${eventoId}/artilharia`, { waitUntil: "networkidle" });
+    await irPara(page, `https://eventos.admfutsal.com.br/evento/${eventoId}/artilharia`);
     const geralId = await acharAbaPorTexto(page, "Geral");
     const geralTop = await extrairArtilharia(page, geralId); // lista completa (a FPFS mostra todos os artilheiros numa página só)
     geralTop.forEach((g) => (g.clube = normalizarClube(g.clube)));
