@@ -53,7 +53,7 @@ async function extrairTabelaClassificacao(page, containerId) {
 // Abas do mata-mata do Torneio União: "TORNEIO UNIÃO - QUARTAS OURO" (e variações
 // com typo "UNIAO") ou, em alguns casos, só "FINAL RUBI" (sem hífen, sem prefixo).
 function ehMataMataUniao(texto) {
-  return /TORNEIO UNI[ÃA]O\s*-?\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto) || /^FINAIS\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
+  return /TORNEIO UNI[ÃA]O\s*(OURO|PRATA|BRONZE|BRONE|RUBI)?\s*-?\s*(DISPUTA|FINAL)/i.test(texto) || /TORNEIO UNI[ÃA]O\s*-?\s*(OITAVAS|QUARTAS|SEMI|FINAL)/i.test(texto) || /^FINAL\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto) || /^FINAIS\s+(OURO|PRATA|BRONZE|BRONE|RUBI)$/i.test(texto);
 }
 
 function nomeFase(texto) {
@@ -231,12 +231,15 @@ async function coletar() {
     );
     for (const aba of abasMata) {
       if (!ehMataMataUniao(aba.texto)) continue;
-      const m = aba.texto.match(/(OITAVAS|QUARTAS|SEMI\w*|FINAIS|FINAL)\w*(?:\s+DE\s+FINAIS?)?\s*-?\s*(OURO|PRATA|BRONZE|BRONE|RUBI)/i);
-      if (!m) continue;
-      const f = m[1].toUpperCase();
+      const tx = aba.texto.toUpperCase();
+      const disputa = /DISPUTA/.test(tx);
+      const fm = tx.match(/OITAVAS|QUARTAS|SEMI|FINAIS|FINAL/);
+      const sm = tx.match(/OURO|PRATA|BRONZE|BRONE|RUBI/);
+      if (!disputa && (!fm || !sm)) continue;
+      const f = disputa ? "FINAL" : fm[0];
       const fase = f.startsWith("OITAVAS") ? "Oitavas" : f.startsWith("QUARTAS") ? "Quartas" : f.startsWith("SEMI") ? "Semifinal" : "Final";
-      const s = m[2].toUpperCase();
-      const serie = s === "BRONE" ? "Bronze" : s.charAt(0) + s.slice(1).toLowerCase();
+      const s = sm ? sm[0] : "OURO"; // "TORNEIO UNIÃO - DISPUTA 3º E 4º" (sem série no nome) é do Ouro
+      const serie = s === "BRONE" ? "Bronze" : s.charAt(0) + s.slice(1).toLowerCase().toLowerCase();
       const jogosM = await extrairJogos(page, aba.id, categoria, fase);
       jogosM.forEach((j) => {
         dados.matamataUniao.push([
